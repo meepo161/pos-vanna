@@ -6,15 +6,15 @@ import ru.avem.posvanna.communication.model.CommunicationModel
 import ru.avem.posvanna.communication.model.devices.owen.pr.OwenPrModel
 import ru.avem.posvanna.communication.model.devices.owen.trm136.Trm136Model
 import ru.avem.posvanna.communication.model.devices.parma.ParmaModel
-import ru.avem.posvanna.utils.LogTag
-import ru.avem.posvanna.utils.Toast
-import ru.avem.posvanna.utils.sleep
+import ru.avem.posvanna.utils.*
 import ru.avem.posvanna.view.MainView
 import tornadofx.add
 import tornadofx.runLater
+import tornadofx.seconds
 import tornadofx.style
 import java.text.SimpleDateFormat
 import kotlin.experimental.and
+import kotlin.time.ExperimentalTime
 
 class Test1Controller : TestController() {
     val controller: MainViewController by inject()
@@ -23,171 +23,83 @@ class Test1Controller : TestController() {
     private var logBuffer: String? = null
 
     @Volatile
-    var isExperimentRunning: Boolean = true
-
-    @Volatile
     var isExperimentEnded: Boolean = true
 
     //region переменные для значений с приборов
+    @Volatile
+    private var isStartButton: Boolean = false
 
     @Volatile
-    private var measuringU11: Double = 0.0
+    private var measuringUA: Double = 0.0
 
     @Volatile
-    private var measuringI11: Double = 0.0
+    private var measuringUB: Double = 0.0
+
+    @Volatile
+    private var measuringUC: Double = 0.0
+
+    @Volatile
+    private var measuringIA: Double = 0.0
+
+    @Volatile
+    private var measuringIB: Double = 0.0
+
+    @Volatile
+    private var measuringIC: Double = 0.0
 
     @Volatile
     private var measuringt11: Double = 0.0
 
     @Volatile
-    private var measuringU12: Double = 0.0
-
-    @Volatile
-    private var measuringI12: Double = 0.0
-
-    @Volatile
     private var measuringt12: Double = 0.0
-
-    @Volatile
-    private var measuringU13: Double = 0.0
-
-    @Volatile
-    private var measuringI13: Double = 0.0
 
     @Volatile
     private var measuringt13: Double = 0.0
 
     @Volatile
-    private var measuringU14: Double = 0.0
-
-    @Volatile
-    private var measuringI14: Double = 0.0
-
-    @Volatile
     private var measuringt14: Double = 0.0
-
-    @Volatile
-    private var measuringU15: Double = 0.0
-
-    @Volatile
-    private var measuringI15: Double = 0.0
 
     @Volatile
     private var measuringt15: Double = 0.0
 
     @Volatile
-    private var measuringU16: Double = 0.0
-
-    @Volatile
-    private var measuringI16: Double = 0.0
-
-    @Volatile
     private var measuringt16: Double = 0.0
 
     @Volatile
-    private var measuringU21: Double = 0.0
-
-    @Volatile
-    private var measuringI21: Double = 0.0
+    private var measuringt17: Double = 0.0
 
     @Volatile
     private var measuringt21: Double = 0.0
 
     @Volatile
-    private var measuringU22: Double = 0.0
-
-    @Volatile
-    private var measuringI22: Double = 0.0
-
-    @Volatile
     private var measuringt22: Double = 0.0
-
-    @Volatile
-    private var measuringU23: Double = 0.0
-
-    @Volatile
-    private var measuringI23: Double = 0.0
 
     @Volatile
     private var measuringt23: Double = 0.0
 
     @Volatile
-    private var measuringU24: Double = 0.0
-
-    @Volatile
-    private var measuringI24: Double = 0.0
-
-    @Volatile
     private var measuringt24: Double = 0.0
-
-    @Volatile
-    private var measuringU25: Double = 0.0
-
-    @Volatile
-    private var measuringI25: Double = 0.0
 
     @Volatile
     private var measuringt25: Double = 0.0
 
     @Volatile
-    private var measuringU26: Double = 0.0
-
-    @Volatile
-    private var measuringI26: Double = 0.0
-
-    @Volatile
     private var measuringt26: Double = 0.0
-
-    @Volatile
-    private var measuringU31: Double = 0.0
-
-    @Volatile
-    private var measuringI31: Double = 0.0
 
     @Volatile
     private var measuringt31: Double = 0.0
 
     @Volatile
-    private var measuringU32: Double = 0.0
-
-    @Volatile
-    private var measuringI32: Double = 0.0
-
-    @Volatile
     private var measuringt32: Double = 0.0
-
-    @Volatile
-    private var measuringU33: Double = 0.0
-
-    @Volatile
-    private var measuringI33: Double = 0.0
 
     @Volatile
     private var measuringt33: Double = 0.0
 
     @Volatile
-    private var measuringU34: Double = 0.0
-
-    @Volatile
-    private var measuringI34: Double = 0.0
-
-    @Volatile
     private var measuringt34: Double = 0.0
 
     @Volatile
-    private var measuringU35: Double = 0.0
-
-    @Volatile
-    private var measuringI35: Double = 0.0
-
-    @Volatile
     private var measuringt35: Double = 0.0
-
-    @Volatile
-    private var measuringU36: Double = 0.0
-
-    @Volatile
-    private var measuringI36: Double = 0.0
 
     @Volatile
     private var measuringt36: Double = 0.0
@@ -244,14 +156,6 @@ class Test1Controller : TestController() {
         }
     }
 
-    var cause: String = ""
-        set(value) {
-            if (value != "") {
-                isExperimentRunning = false
-            }
-            field = value
-        }
-
     private fun startPollDevices() {
         //region pr pool
         CommunicationModel.startPoll(CommunicationModel.DeviceID.DD2, OwenPrModel.FIXED_STATES_REGISTER_1) { value ->
@@ -262,19 +166,19 @@ class Test1Controller : TestController() {
             startButton = value.toShort() and 32 > 0
             stopButton = value.toShort() and 64 > 0
             if (doorShkaf) {
-                cause = "Открыта дверь шкафа"
+                controller.cause = "Открыта дверь шкафа"
             }
             if (doorZone1) {
-                cause = "Открыта дверь зоны 1"
+                controller.cause = "Открыта дверь зоны 1"
             }
             if (doorZone2) {
-                cause = "Открыта дверь зоны 2 "
+                controller.cause = "Открыта дверь зоны 2 "
             }
             if (doorZone3) {
-                cause = "Открыта дверь зоны 3 "
+                controller.cause = "Открыта дверь зоны 3 "
             }
             if (stopButton) {
-                cause = "Нажали кнопку СТОП"
+                controller.cause = "Нажали кнопку СТОП"
             }
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.DD2, OwenPrModel.FIXED_STATES_REGISTER_2) { value ->
@@ -282,248 +186,323 @@ class Test1Controller : TestController() {
             currentI2 = value.toShort() and 2 > 0
             currentI3 = value.toShort() and 4 > 0
             if (currentI1) {
-                cause = "Токовая защита лопасти 1"
+                controller.cause = "Токовая защита лопасти 1"
             }
             if (currentI2) {
-                cause = "Токовая защита лопасти 2"
+                controller.cause = "Токовая защита лопасти 2"
             }
             if (currentI3) {
-                cause = "Токовая защита лопасти 3"
+                controller.cause = "Токовая защита лопасти 3"
             }
         }
         //endregion
+
         //region parma poll
         CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.IA) { value ->
-            measuringI11 = value.toShort() / 5000.0
+            measuringIA = value.toDouble() * 10
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.IB) { value ->
-            measuringI12 = value.toShort() / 5000.0
+            measuringIB = value.toDouble() * 10
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.IC) { value ->
-            measuringI13 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.UA) { value ->
-            measuringU11 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.UB) { value ->
-            measuringU12 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.UC) { value ->
-            measuringU13 = value.toShort() / 100.0
+            measuringIC = value.toDouble() * 10
         }
 
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.IA) { value ->
-            measuringI21 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.IB) { value ->
-            measuringI22 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.IC) { value ->
-            measuringI23 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.UA) { value ->
-            measuringU21 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.UB) { value ->
-            measuringU22 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.UC) { value ->
-            measuringU23 = value.toShort() / 100.0
+        if (measuringIA > 29 || measuringIB > 29 || measuringIC > 29) {
+            controller.cause = "Ток превысил 29А"
         }
 
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.IA) { value ->
-            measuringI31 = value.toShort() / 5000.0
+        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.U_AB) { value ->
+            measuringUA = value.toDouble()
         }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.IB) { value ->
-            measuringI32 = value.toShort() / 5000.0
+        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.U_BC) { value ->
+            measuringUB = value.toDouble()
         }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.IC) { value ->
-            measuringI33 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.UA) { value ->
-            measuringU31 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.UB) { value ->
-            measuringU32 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.UC) { value ->
-            measuringU33 = value.toShort() / 100.0
-        }
-
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.IA) { value ->
-            measuringI14 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.IB) { value ->
-            measuringI15 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.IC) { value ->
-            measuringI16 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.UA) { value ->
-            measuringU14 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.UB) { value ->
-            measuringU15 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.UC) { value ->
-            measuringU16 = value.toShort() / 100.0
-        }
-
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.IA) { value ->
-            measuringI24 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.IB) { value ->
-            measuringI25 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.IC) { value ->
-            measuringI26 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.UA) { value ->
-            measuringU24 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.UB) { value ->
-            measuringU25 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA2, ParmaModel.UC) { value ->
-            measuringU26 = value.toShort() / 100.0
-        }
-
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.IA) { value ->
-            measuringI34 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.IB) { value ->
-            measuringI35 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.IC) { value ->
-            measuringI36 = value.toShort() / 5000.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.UA) { value ->
-            measuringU34 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.UB) { value ->
-            measuringU35 = value.toShort() / 100.0
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA3, ParmaModel.UC) { value ->
-            measuringU36 = value.toShort() / 100.0
+        CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.U_CA) { value ->
+            measuringUC = value.toDouble()
         }
         //endregion
+
         //region trm poll
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_1) { value ->
             measuringt11 = value.toDouble()
         }
+        runLater {
+            controller.tableValuesTest1[0].section1t.value = formatRealNumber(measuringt11).toString()
+        }
+        if (measuringt11 > 45) {
+            controller.cause = "Температура 1 лопасти 1 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_2) { value ->
             measuringt12 = value.toDouble()
+        }
+        if (measuringt12 > 45) {
+            controller.cause = "Температура 1 лопасти 2 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_3) { value ->
             measuringt13 = value.toDouble()
         }
+        if (measuringt13 > 45) {
+            controller.cause = "Температура 1 лопасти 3 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_4) { value ->
             measuringt14 = value.toDouble()
+        }
+        if (measuringt14 > 45) {
+            controller.cause = "Температура 1 лопасти 4 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_5) { value ->
             measuringt15 = value.toDouble()
         }
+        if (measuringt15 > 45) {
+            controller.cause = "Температура 1 лопасти 5 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_6) { value ->
             measuringt16 = value.toDouble()
+        }
+        if (measuringt16 > 45) {
+            controller.cause = "Температура 1 лопасти 6 секции больше 45°С"
+        }
+        CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_7) { value ->
+            measuringt17 = value.toDouble()
+        }
+        if (measuringt17 > 45) {
+            controller.cause = "Температура воды больше 45°С"
         }
 
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_1) { value ->
             measuringt21 = value.toDouble()
         }
+        if (measuringt21 > 45) {
+            controller.cause = "Температура 2 лопасти 1 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_2) { value ->
             measuringt22 = value.toDouble()
+        }
+        if (measuringt22 > 45) {
+            controller.cause = "Температура 2 лопасти 2 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_3) { value ->
             measuringt23 = value.toDouble()
         }
+        if (measuringt23 > 45) {
+            controller.cause = "Температура 2 лопасти 3 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_4) { value ->
             measuringt24 = value.toDouble()
+        }
+        if (measuringt24 > 45) {
+            controller.cause = "Температура 2 лопасти 4 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_5) { value ->
             measuringt25 = value.toDouble()
         }
+        if (measuringt25 > 45) {
+            controller.cause = "Температура 2 лопасти 5 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_6) { value ->
             measuringt26 = value.toDouble()
+        }
+        if (measuringt26 > 45) {
+            controller.cause = "Температура 2 лопасти 6 секции больше 45°С"
         }
 
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_1) { value ->
             measuringt31 = value.toDouble()
         }
+        if (measuringt31 > 45) {
+            controller.cause = "Температура 3 лопасти 1 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_2) { value ->
             measuringt32 = value.toDouble()
+        }
+        if (measuringt32 > 45) {
+            controller.cause = "Температура 3 лопасти 2 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_3) { value ->
             measuringt33 = value.toDouble()
         }
+        if (measuringt33 > 45) {
+            controller.cause = "Температура 3 лопасти 3 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_4) { value ->
             measuringt34 = value.toDouble()
+        }
+        if (measuringt34 > 45) {
+            controller.cause = "Температура 3 лопасти 4 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_5) { value ->
             measuringt35 = value.toDouble()
         }
+        if (measuringt35 > 45) {
+            controller.cause = "Температура 3 лопасти 5 секции больше 45°С"
+        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_6) { value ->
             measuringt36 = value.toDouble()
+        }
+        if (measuringt36 > 45) {
+            controller.cause = "Температура 3 лопасти 6 секции больше 45°С"
         }
         //endregion
     }
 
+    @ExperimentalTime
     fun startTest() {
-        cause = ""
+        controller.cause = ""
 
         isExperimentEnded = false
 
-        if (isExperimentRunning) {
+        if (controller.isExperimentRunning) {
             appendMessageToLog(LogTag.DEBUG, "Инициализация устройств")
         }
 
-        while (isExperimentRunning) {
-            sleep(1000)
-        }
-
-        while (!controller.isDevicesResponding() && isExperimentRunning) {
-            CommunicationModel.checkDevices()
-            sleep(100)
-        }
-
-        if (isExperimentRunning && controller.isDevicesResponding()) {
+        if (controller.isExperimentRunning && controller.isDevicesResponding()) {
             CommunicationModel.addWritingRegister(
                 CommunicationModel.DeviceID.DD2,
                 OwenPrModel.RESET_DOG,
                 1.toShort()
             )
             owenPR.initOwenPR()
+            sleep(1000)
             startPollDevices()
             sleep(1000)
         }
 
-        if (!startButton && isExperimentRunning && controller.isDevicesResponding()) {
+
+        while (controller.isExperimentRunning) {
             runLater {
-                Toast.makeText("Нажмите кнопку ПУСК").show(Toast.ToastType.WARNING)
+                controller.tableValuesTest3[0].section31t.value = formatRealNumber(measuringt31).toString()
             }
-        }
-        var timeToStart = 300
-        while (!startButton && isExperimentRunning && controller.isDevicesResponding() && timeToStart-- > 0) {
-            appendOneMessageToLog(LogTag.DEBUG, "Нажмите кнопку ПУСК")
             sleep(100)
         }
+//        while (!controller.isDevicesResponding() && controller.isExperimentRunning) {
+//            CommunicationModel.checkDevices()
+//            sleep(100)
+//        }
+//
 
-        if (!startButton) {
-            cause = "Не нажата кнопка ПУСК"
-        }
+//
+//        if (!startButton && controller.isExperimentRunning && controller.isDevicesResponding()) {
+//            runLater {
+//                Toast.makeText("Нажмите кнопку ПУСК").show(Toast.ToastType.WARNING)
+//            }
+//        }
+//        var timeToStart = 300
+//        while (!startButton && controller.isExperimentRunning && controller.isDevicesResponding() && timeToStart-- > 0) {
+//            appendOneMessageToLog(LogTag.DEBUG, "Нажмите кнопку ПУСК")
+//            sleep(100)
+//        }
+//
+//        if (!startButton) {
+//            cause = "Не нажата кнопка ПУСК"
+//        }
 
-        if (isExperimentRunning && controller.isDevicesResponding()) {
+        if (controller.isExperimentRunning && controller.isDevicesResponding()) {
             appendMessageToLog(LogTag.DEBUG, "Подготовка стенда")
             appendMessageToLog(LogTag.DEBUG, "Сбор схемы")
         }
 
+//        owenPR.on11()
+//        owenPR.on21()
+//        owenPR.on31()
+//        sleepWhile(5)
+//        appendOneMessageToLog(LogTag.MESSAGE, "Ток IA = " + formatRealNumber(measuringIA).toString())
+//        appendOneMessageToLog(LogTag.MESSAGE, "Напряжение UA = " + formatRealNumber(measuringUA).toString())
+//        sleepWhile(5)
+//        owenPR.off11()
+//        owenPR.off21()
+//        owenPR.off31()
+
+        var cycles = mainView.textFieldTimeCycle.text.toInt()
+
+        val allTime =
+            ((controller.tableValuesTest4[0].start.value.toDouble() * 60) + (controller.tableValuesTest4[0].pause.value.toDouble() * 60) +
+                    (controller.tableValuesTest4[1].start.value.toDouble() * 60) + (controller.tableValuesTest4[1].pause.value.toDouble() * 60) +
+                    (controller.tableValuesTest4[2].start.value.toDouble() * 60) + (controller.tableValuesTest4[2].pause.value.toDouble() * 60) +
+                    (controller.tableValuesTest4[3].start.value.toDouble() * 60) + (controller.tableValuesTest4[3].pause.value.toDouble() * 60) +
+                    (controller.tableValuesTest4[4].start.value.toDouble() * 60) + (controller.tableValuesTest4[4].pause.value.toDouble() * 60) +
+                    (controller.tableValuesTest4[5].start.value.toDouble() * 60) + (controller.tableValuesTest4[5].pause.value.toDouble() * 60)
+                    * mainView.textFieldTimeCycle.text.toDouble()).toInt()
+        val callbackTimer = CallbackTimer(
+            tickPeriod = 1.seconds, tickTimes = allTime,
+            tickJob = {
+                if (!controller.isExperimentRunning) it.stop()
+                runLater {
+                    mainView.labelTimeRemaining.text =
+                        "Осталось всего: " + toHHmmss((allTime - it.getCurrentTicks()) * 1000L)
+                }
+            },
+            onFinishJob = {
+            })
+
+//        while (controller.isExperimentRunning && controller.isDevicesResponding() && cycles-- > 0) {
+//            if (mainView.checkBoxTest1.isSelected) {
+//                owenPR.on11()
+//            }
+//            if (mainView.checkBoxTest2.isSelected) {
+//                owenPR.on21()
+//            }
+//            if (mainView.checkBoxTest3.isSelected) {
+//                owenPR.on31()
+//            }
+//
+//            val timeStart = (controller.tableValuesTest4[0].start.value.toDouble() * 60).toInt()
+//            val callbackTimerStart = CallbackTimer(
+//                tickPeriod = 1.seconds, tickTimes = timeStart,
+//                tickJob = {
+//                    if (!controller.isExperimentRunning) {
+//                        it.stop()
+//                    } else {
+//                        runLater {
+//                            mainView.labelTestStatus.text =
+//                                "Статус: нагрев 1 cекции. Осталось: " + toHHmmss((timeStart - it.getCurrentTicks()) * 1000L)
+//                        }
+//                    }
+//                },
+//                onFinishJob = {
+//                })
+//
+//            while (controller.isExperimentRunning && callbackTimerStart.isRunning && controller.isDevicesResponding()) {
+//                sleep(100)
+//            }
+//
+//            owenPR.offAllKMs()
+//
+//
+//            val timePause = (controller.tableValuesTest4[0].pause.value.toDouble() * 60 * 60).toInt()
+//            val textFieldTimePause = CallbackTimer(
+//                tickPeriod = 1.seconds, tickTimes = timePause,
+//                tickJob = {
+//                    if (!controller.isExperimentRunning) {
+//                        it.stop()
+//                    } else {
+//                        runLater {
+//                            mainView.labelTestStatus.text =
+//                                "Статус: пауза 1 cекции. Осталось: " + toHHmmss((timePause - it.getCurrentTicks()) * 1000L)
+//                        }
+//                    }
+//                },
+//                onFinishJob = {
+//                })
+//
+//            while (controller.isExperimentRunning && textFieldTimePause.isRunning) {
+//                sleep(100)
+//            }
+//        }
+
+
+        owenPR.offAllKMs()
         setResult()
 
         finalizeExperiment()
+        runLater {
+            mainView.labelTestStatus.text = "Статус: стоп"
+        }
     }
 
     private fun sleepWhile(timeSecond: Int) {
         var timer = timeSecond * 10
-        while (isExperimentRunning && timer-- > 0) {
+        while (controller.isExperimentRunning && timer-- > 0 && controller.isDevicesResponding()) {
             sleep(100)
         }
     }
@@ -531,8 +510,8 @@ class Test1Controller : TestController() {
     private fun setResult() {
         if (!controller.isDevicesResponding()) {
             appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: \nпотеряна связь с устройствами")
-        } else if (cause.isNotEmpty()) {
-            appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: ${cause}")
+        } else if (controller.cause.isNotEmpty()) {
+            appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: ${controller.cause}")
         } else {
             appendMessageToLog(LogTag.MESSAGE, "Испытание завершено успешно")
         }
@@ -540,7 +519,7 @@ class Test1Controller : TestController() {
 
     private fun finalizeExperiment() {
         isExperimentEnded = true
-        owenPR.offAllKMs()
+//        owenPR.offAllKMs()
         CommunicationModel.clearPollingRegisters()
 
     }

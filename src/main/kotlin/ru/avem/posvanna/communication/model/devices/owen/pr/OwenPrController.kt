@@ -1,7 +1,7 @@
 package ru.avem.posvanna.communication.model.devices.owen.pr
 
-import ru.avem.posvanna.communication.adapters.modbusrtu.ModbusRTUAdapter
-import ru.avem.posvanna.communication.adapters.utils.ModbusRegister
+import ru.avem.kserialpooler.communication.adapters.modbusrtu.ModbusRTUAdapter
+import ru.avem.kserialpooler.communication.adapters.utils.ModbusRegister
 import ru.avem.posvanna.communication.model.DeviceRegister
 import ru.avem.posvanna.communication.model.IDeviceController
 import ru.avem.posvanna.communication.utils.TransportException
@@ -15,9 +15,9 @@ import kotlin.experimental.or
 import kotlin.math.pow
 
 class OwenPrController(
-        override val name: String,
-        override val protocolAdapter: ModbusRTUAdapter,
-        override val id: Byte
+    override val name: String,
+    override val protocolAdapter: ModbusRTUAdapter,
+    override val id: Byte
 ) : IDeviceController {
     val model = OwenPrModel()
     override var isResponding = false
@@ -40,7 +40,7 @@ class OwenPrController(
     override fun readRegister(register: DeviceRegister) {
         transactionWithAttempts {
             val modbusRegister =
-                    protocolAdapter.readHoldingRegisters(id, register.address, 2).map(ModbusRegister::toShort)
+                protocolAdapter.readHoldingRegisters(id, register.address, 2).map(ModbusRegister::toShort)
             register.value = allocateOrderedByteBuffer(modbusRegister, TypeByteOrder.LITTLE_ENDIAN, 4).float.toDouble()
         }
     }
@@ -141,6 +141,7 @@ class OwenPrController(
 
     fun initOwenPR() {
         writeRegister(getRegisterById(OwenPrModel.RES_REGISTER), 1)
+        writeRegister(getRegisterById(OwenPrModel.RES_REGISTER), 0)
     }
 
     fun resetKMS() {
@@ -186,7 +187,7 @@ class OwenPrController(
     }
 
     fun on24() {
-        onBitInRegister(getRegisterById(OwenPrModel.KMS2_REGISTER), 2)
+        onBitInRegister2(getRegisterById(OwenPrModel.KMS2_REGISTER), 2)
     }
 
     fun on25() {
@@ -258,7 +259,7 @@ class OwenPrController(
     }
 
     fun off24() {
-        offBitInRegister(getRegisterById(OwenPrModel.KMS2_REGISTER), 2)
+        offBitInRegister2(getRegisterById(OwenPrModel.KMS2_REGISTER), 2)
     }
 
     fun off25() {
@@ -292,7 +293,6 @@ class OwenPrController(
     fun off36() {
         offBitInRegister3(getRegisterById(OwenPrModel.KMS3_REGISTER), 2)
     }
-
 
     fun offAllKMs() {
         writeRegister(getRegisterById(OwenPrModel.KMS1_REGISTER), 0)

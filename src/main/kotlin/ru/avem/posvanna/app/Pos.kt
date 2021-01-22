@@ -22,8 +22,8 @@ class Pos : App(MainView::class, Styles::class) {
 
     override fun start(stage: Stage) {
         stage.isFullScreen = false
-        stage.isResizable = false
-        stage.initStyle(StageStyle.TRANSPARENT)
+        stage.isResizable = true
+//        stage.initStyle(StageStyle.TRANSPARENT)
         stage.fullScreenExitKeyCombination = KeyCombination.NO_MATCH
         super.start(stage)
         FX.primaryStage.icons += Image("icon.png")
@@ -32,5 +32,6 @@ class Pos : App(MainView::class, Styles::class) {
 
     override fun stop() {
         isAppRunning = false
+        super.stop()
     }
 }

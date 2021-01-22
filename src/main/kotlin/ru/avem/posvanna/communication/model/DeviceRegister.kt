@@ -5,7 +5,8 @@ import java.util.*
 class DeviceRegister(
     val address: Short,
     val valueType: RegisterValueType,
-    val unit: String = ""
+    val unit: String = "",
+    val coefficient: Double = 1.0
 ) : Observable() {
     enum class RegisterValueType {
         SHORT,
@@ -15,7 +16,7 @@ class DeviceRegister(
 
     var value: Number = 0.0
         set(value) {
-            field = value
+            field = value.toDouble() * coefficient
             setChanged()
             notifyObservers(field)
         }

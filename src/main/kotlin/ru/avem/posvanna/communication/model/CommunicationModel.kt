@@ -1,12 +1,12 @@
 package ru.avem.posvanna.communication.model
 
+import ru.avem.kserialpooler.communication.Connection
+import ru.avem.kserialpooler.communication.adapters.modbusrtu.ModbusRTUAdapter
+import ru.avem.kserialpooler.communication.utils.SerialParameters
 import ru.avem.posvanna.app.Pos.Companion.isAppRunning
-import ru.avem.posvanna.communication.Connection
-import ru.avem.posvanna.communication.adapters.modbusrtu.ModbusRTUAdapter
 import ru.avem.posvanna.communication.model.devices.owen.pr.OwenPrController
 import ru.avem.posvanna.communication.model.devices.owen.trm136.Trm136Controller
 import ru.avem.posvanna.communication.model.devices.parma.ParmaController
-import ru.avem.posvanna.communication.utils.SerialParameters
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
 
@@ -15,11 +15,6 @@ object CommunicationModel {
     enum class DeviceID(description: String) {
         DD2("ПР"),
         PARMA1("ПАРМА1"),
-        PARMA2("ПАРМА2"),
-        PARMA3("ПАРМА3"),
-        PARMA4("ПАРМА4"),
-        PARMA5("ПАРМА5"),
-        PARMA6("ПАРМА6"),
         TRM1("TRM1"),
         TRM2("TRM2"),
         TRM3("TRM3")
@@ -29,7 +24,7 @@ object CommunicationModel {
 
     private val connection = Connection(
             adapterName = "CP2103 USB to RS-485",
-            serialParameters = SerialParameters(8, 0, 1, 115200),
+            serialParameters = SerialParameters(8, 0, 1, 38400),
             timeoutRead = 100,
             timeoutWrite = 100
     ).apply {
@@ -41,15 +36,10 @@ object CommunicationModel {
 
     private val deviceControllers: Map<DeviceID, IDeviceController> = mapOf(
             DeviceID.PARMA1 to ParmaController(DeviceID.PARMA1.toString(), modbusAdapter, 1),
-            DeviceID.PARMA2 to ParmaController(DeviceID.PARMA2.toString(), modbusAdapter, 2),
-            DeviceID.PARMA3 to ParmaController(DeviceID.PARMA3.toString(), modbusAdapter, 3),
-            DeviceID.PARMA4 to ParmaController(DeviceID.PARMA4.toString(), modbusAdapter, 4),
-            DeviceID.PARMA5 to ParmaController(DeviceID.PARMA5.toString(), modbusAdapter, 5),
-            DeviceID.PARMA6 to ParmaController(DeviceID.PARMA6.toString(), modbusAdapter, 6),
-            DeviceID.DD2 to OwenPrController(DeviceID.DD2.toString(), modbusAdapter, 7),
+            DeviceID.DD2 to OwenPrController(DeviceID.DD2.toString(), modbusAdapter, 2),
             DeviceID.TRM1 to Trm136Controller(DeviceID.TRM1.toString(), modbusAdapter, 8),
-            DeviceID.TRM2 to Trm136Controller(DeviceID.TRM2.toString(), modbusAdapter, 9),
-            DeviceID.TRM3 to Trm136Controller(DeviceID.TRM3.toString(), modbusAdapter, 10)
+            DeviceID.TRM2 to Trm136Controller(DeviceID.TRM2.toString(), modbusAdapter, 16),
+            DeviceID.TRM3 to Trm136Controller(DeviceID.TRM3.toString(), modbusAdapter, 24)
     )
 
     init {

@@ -14,18 +14,20 @@ class OwenPrModel : IDeviceModel {
         const val RESET_DOG = "RESET_DOG"
         const val INSTANT_STATES_REGISTER_2 = "INSTANT_STATES_REGISTER_2"
         const val FIXED_STATES_REGISTER_2 = "FIXED_STATES_REGISTER_2"
+        const val RESET_TIMER = "RESET_TIMER"
     }
 
     override val registers: Map<String, DeviceRegister> = mapOf(
             INSTANT_STATES_REGISTER_1 to DeviceRegister(512, DeviceRegister.RegisterValueType.SHORT),
             FIXED_STATES_REGISTER_1 to DeviceRegister(513, DeviceRegister.RegisterValueType.SHORT),
             RES_REGISTER to DeviceRegister(514, DeviceRegister.RegisterValueType.SHORT),
+            RESET_TIMER to DeviceRegister(522, DeviceRegister.RegisterValueType.SHORT),
             KMS1_REGISTER to DeviceRegister(515, DeviceRegister.RegisterValueType.SHORT),
             KMS2_REGISTER to DeviceRegister(516, DeviceRegister.RegisterValueType.SHORT),
             RESET_DOG to DeviceRegister(517, DeviceRegister.RegisterValueType.SHORT),
             INSTANT_STATES_REGISTER_2 to DeviceRegister(520, DeviceRegister.RegisterValueType.SHORT),
             FIXED_STATES_REGISTER_2 to DeviceRegister(521, DeviceRegister.RegisterValueType.SHORT),
-            KMS3_REGISTER to DeviceRegister(522, DeviceRegister.RegisterValueType.SHORT)
+            KMS3_REGISTER to DeviceRegister(518, DeviceRegister.RegisterValueType.SHORT)
     )
 
     override fun getRegisterById(idRegister: String) =

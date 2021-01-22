@@ -1,13 +1,14 @@
 package ru.avem.posvanna.communication.model
 
 import mu.KotlinLogging
-import ru.avem.posvanna.communication.adapters.Adapter
+import ru.avem.kserialpooler.communication.adapters.modbusrtu.ModbusRTUAdapter
 import ru.avem.posvanna.communication.utils.TransportException
+import ru.avem.posvanna.utils.sleep
 
 interface IDeviceController {
     val name: String
 
-    val protocolAdapter: Adapter
+    val protocolAdapter: ModbusRTUAdapter
 
     val id: Byte
 
@@ -102,6 +103,7 @@ interface IDeviceController {
             pollingRegisters.forEach {
                 isResponding = try {
                     readRegister(it)
+                    sleep(50)
                     true
                 } catch (e: TransportException) {
                     false

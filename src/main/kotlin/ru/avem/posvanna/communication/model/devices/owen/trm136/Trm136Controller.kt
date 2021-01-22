@@ -1,7 +1,7 @@
 package ru.avem.posvanna.communication.model.devices.owen.trm136
 
-import ru.avem.posvanna.communication.adapters.modbusrtu.ModbusRTUAdapter
-import ru.avem.posvanna.communication.adapters.utils.ModbusRegister
+import ru.avem.kserialpooler.communication.adapters.modbusrtu.ModbusRTUAdapter
+import ru.avem.kserialpooler.communication.adapters.utils.ModbusRegister
 import ru.avem.posvanna.communication.model.DeviceRegister
 import ru.avem.posvanna.communication.model.IDeviceController
 import ru.avem.posvanna.communication.utils.TransportException
@@ -11,9 +11,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class Trm136Controller(
-        override val name: String,
-        override val protocolAdapter: ModbusRTUAdapter,
-        override val id: Byte
+    override val name: String,
+    override val protocolAdapter: ModbusRTUAdapter,
+    override val id: Byte
 ) : IDeviceController {
     val model = Trm136Model()
     override var isResponding = false
@@ -30,17 +30,17 @@ class Trm136Controller(
             transactionWithAttempts {
                 when (register.valueType) {
                     DeviceRegister.RegisterValueType.SHORT -> {
-                        val value = protocolAdapter.readHoldingRegisters(id, register.address, 1).first().toShort()
+                        val value = protocolAdapter.readInputRegisters(id, register.address, 1).first().toShort()
                         register.value = value
                     }
                     DeviceRegister.RegisterValueType.FLOAT -> {
                         val modbusRegister =
-                                protocolAdapter.readHoldingRegisters(id, register.address, 2).map(ModbusRegister::toShort)
+                                protocolAdapter.readInputRegisters(id, register.address, 2).map(ModbusRegister::toShort)
                         register.value = allocateOrderedByteBuffer(modbusRegister, TypeByteOrder.BIG_ENDIAN, 4).float
                     }
                     DeviceRegister.RegisterValueType.INT32 -> {
                         val modbusRegister =
-                                protocolAdapter.readHoldingRegisters(id, register.address, 2).map(ModbusRegister::toShort)
+                                protocolAdapter.readInputRegisters(id, register.address, 2).map(ModbusRegister::toShort)
                         register.value = allocateOrderedByteBuffer(modbusRegister, TypeByteOrder.BIG_ENDIAN, 4).int
                     }
                 }

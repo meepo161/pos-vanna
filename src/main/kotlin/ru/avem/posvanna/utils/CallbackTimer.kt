@@ -1,8 +1,9 @@
 package ru.avem.posvanna.utils
 
 import javafx.util.Duration
-import tornadofx.*
+import tornadofx.seconds
 import java.util.*
+import kotlin.concurrent.thread
 
 class CallbackTimer(
     delay: Duration = 0.seconds,
@@ -32,10 +33,10 @@ class CallbackTimer(
     }
 
     init {
-        Thread {
+        thread(isDaemon = true) {
             onStartJob(this)
             timer.schedule(timerTask, delay.toMillis().toLong(), tickPeriod.toMillis().toLong())
-        }.start()
+        }
     }
 
     override fun getCurrentTicks() = currentTick

@@ -11,6 +11,8 @@ class Trm136Model : IDeviceModel {
         const val TEMPERATURE_4 = "TEMPERATURE_4"
         const val TEMPERATURE_5 = "TEMPERATURE_5"
         const val TEMPERATURE_6 = "TEMPERATURE_6"
+        const val TEMPERATURE_7 = "TEMPERATURE_7"
+        const val TEMPERATURE_8 = "TEMPERATURE_8"
     }
 
     override val registers: Map<String, DeviceRegister> = mapOf(
@@ -19,7 +21,9 @@ class Trm136Model : IDeviceModel {
             TEMPERATURE_3 to DeviceRegister(0x000D, DeviceRegister.RegisterValueType.FLOAT),
             TEMPERATURE_4 to DeviceRegister(0x0012, DeviceRegister.RegisterValueType.FLOAT),
             TEMPERATURE_5 to DeviceRegister(0x0017, DeviceRegister.RegisterValueType.FLOAT),
-            TEMPERATURE_6 to DeviceRegister(0x001C, DeviceRegister.RegisterValueType.FLOAT)
+            TEMPERATURE_6 to DeviceRegister(0x001C, DeviceRegister.RegisterValueType.FLOAT),
+            TEMPERATURE_7 to DeviceRegister(0x0021, DeviceRegister.RegisterValueType.FLOAT),
+            TEMPERATURE_8 to DeviceRegister(0x0026, DeviceRegister.RegisterValueType.FLOAT)
     )
 
     override fun getRegisterById(idRegister: String) =
