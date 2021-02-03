@@ -6,10 +6,12 @@ import javafx.scene.control.*
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Circle
+import javafx.stage.Modality
 import ru.avem.posvanna.controllers.MainViewController
 import ru.avem.posvanna.entities.*
 import ru.avem.posvanna.view.Styles.Companion.extraHard
 import ru.avem.posvanna.view.Styles.Companion.megaHard
+import ru.avem.posvanna.view.Styles.Companion.stopStart
 import tornadofx.*
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -56,18 +58,18 @@ class MainView : View("Комплексный стенд для испытани
                         }
                     }
                 }
-//                menu("База данных") {
-//                    item("Объекты испытания") {
-//                        action {
-//                            find<ObjectTypeEditorWindow>().openModal(
-//                                modality = Modality.WINDOW_MODAL,
-//                                escapeClosesWindow = true,
-//                                resizable = false,
-//                                owner = this@MainView.currentWindow
-//                            )
-//                        }
-//                    }
-//                }
+                menu("База данных") {
+                    item("Протоколы") {
+                        action {
+                            find<ProtocolListWindow>().openModal(
+                                modality = Modality.WINDOW_MODAL,
+                                escapeClosesWindow = true,
+                                resizable = false,
+                                owner = this@MainView.currentWindow
+                            )
+                        }
+                    }
+                }
                 menu("Информация") {
                     item("Версия ПО") {
                         action {
@@ -90,12 +92,6 @@ class MainView : View("Комплексный стенд для испытани
                     hbox(spacing = 16.0) {
                         alignmentProperty().set(Pos.CENTER)
                         vbox(spacing = 0.0) {
-                            anchorpaneConstraints {
-                                leftAnchor = 16.0
-                                rightAnchor = 16.0
-                                topAnchor = 16.0
-                                bottomAnchor = 16.0
-                            }
                             hbox(spacing = 16.0) {
                                 alignmentProperty().set(Pos.CENTER)
                                 label("Количество циклов:").addClass(extraHard)
@@ -105,15 +101,15 @@ class MainView : View("Комплексный стенд для испытани
                                     alignment = Pos.CENTER
                                 }.addClass(extraHard)
                             }
-                            tableview(controller.tableValuesTest4) {
+                            tableview(controller.tableValuesTestTime) {
                                 minHeight = 346.0
                                 maxHeight = 346.0
                                 minWidth = 500.0
                                 prefWidth = 500.0
                                 columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
-                                column("", TableValuesTest4::descriptor.getter)
-                                column("Нагрев, мин", TableValuesTest4::start.getter).makeEditable()
-                                column("Пауза, мин", TableValuesTest4::pause.getter).makeEditable()
+                                column("", TableValuesTestTime::descriptor.getter)
+                                column("Нагрев, мин", TableValuesTestTime::start.getter).makeEditable()
+                                column("Пауза, мин", TableValuesTestTime::pause.getter).makeEditable()
                             }
                         }
                         vbox(spacing = 16.0) {
@@ -189,16 +185,35 @@ class MainView : View("Комплексный стенд для испытани
                             bottomAnchor = 16.0
                         }
                         alignmentProperty().set(Pos.CENTER)
-                        tableview(controller.tableValuesTest0) {
+                        tableview(controller.tableValuesTest21) {
                             minHeight = 96.0
                             maxHeight = 96.0
                             minWidth = 500.0
                             prefWidth = 500.0
                             columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
                             mouseTransparentProperty().set(true)
-                            column("", TableValuesTest0::descriptor.getter)
-                            column("U, В", TableValuesTest0::descriptor2.getter)
-                            column("I, А", TableValuesTest0::descriptor3.getter)
+                            column("U, В", TableValuesTest21::voltage.getter)
+                            column("I, А", TableValuesTest21::ampere.getter)
+                        }
+                        tableview(controller.tableValuesTest22) {
+                            minHeight = 96.0
+                            maxHeight = 96.0
+                            minWidth = 500.0
+                            prefWidth = 500.0
+                            columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
+                            mouseTransparentProperty().set(true)
+                            column("U, В", TableValuesTest22::voltage.getter)
+                            column("I, А", TableValuesTest22::ampere.getter)
+                        }
+                        tableview(controller.tableValuesTest23) {
+                            minHeight = 96.0
+                            maxHeight = 96.0
+                            minWidth = 500.0
+                            prefWidth = 500.0
+                            columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
+                            mouseTransparentProperty().set(true)
+                            column("U, В", TableValuesTest23::voltage.getter)
+                            column("I, А", TableValuesTest23::ampere.getter)
                         }
                     }
                     hbox {
@@ -211,12 +226,12 @@ class MainView : View("Комплексный стенд для испытани
 //                                topAnchor = 0.0
 //                                bottomAnchor = 0.0
 //                            }
-                                minHeight = 100.0
-                                maxHeight = 100.0
-                                prefHeight = 100.0
-                                minWidth = 1200.0
-                                minWidth = 1200.0
-                                prefWidth = 1200.0
+                                minHeight = 200.0
+                                maxHeight = 200.0
+                                prefHeight = 200.0
+                                minWidth = 1800.0
+                                minWidth = 1800.0
+                                prefWidth = 1800.0
                                 vBoxLog = vbox {
                                 }.addClass(megaHard)
 
@@ -238,14 +253,14 @@ class MainView : View("Комплексный стенд для испытани
                             action {
                                 controller.handleStartTest()
                             }
-                        }.addClass(extraHard)
+                        }.addClass(stopStart)
                         buttonStop = button("Остановить") {
                             prefWidth = 640.0
                             prefHeight = 128.0
                             action {
                                 controller.handleStopTest()
                             }
-                        }.addClass(Styles.extraHard)
+                        }.addClass(stopStart)
                     }
                 }
             }

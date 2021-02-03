@@ -4,6 +4,7 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.text.Text
 import ru.avem.posvanna.app.Pos.Companion.isAppRunning
+import ru.avem.posvanna.communication.model.CommunicationModel
 import ru.avem.posvanna.entities.*
 import ru.avem.posvanna.utils.LogTag
 import ru.avem.posvanna.utils.State
@@ -16,7 +17,7 @@ import kotlin.concurrent.thread
 import kotlin.time.ExperimentalTime
 
 
-class MainViewController : TestController() {
+class MainViewController : Controller() {
     val view: MainView by inject()
     var position1 = ""
 
@@ -31,9 +32,20 @@ class MainViewController : TestController() {
             field = value
         }
 
-    var tableValuesTest0 = observableListOf(
-        TableValuesTest0(
-            SimpleStringProperty("Измеренные"),
+    var tableValuesTest21 = observableListOf(
+        TableValuesTest21(
+            SimpleStringProperty("0.0"),
+            SimpleStringProperty("0.0")
+        )
+    )
+    var tableValuesTest22 = observableListOf(
+        TableValuesTest22(
+            SimpleStringProperty("0.0"),
+            SimpleStringProperty("0.0")
+        )
+    )
+    var tableValuesTest23 = observableListOf(
+        TableValuesTest23(
             SimpleStringProperty("0.0"),
             SimpleStringProperty("0.0")
         )
@@ -120,33 +132,33 @@ class MainViewController : TestController() {
     )
 
 
-    var tableValuesTest4 = observableList(
-        TableValuesTest4(
+    var tableValuesTestTime = observableList(
+        TableValuesTestTime(
             SimpleStringProperty("1 секция"),
             SimpleStringProperty("1.0"),
             SimpleStringProperty("2.0")
         ),
-        TableValuesTest4(
+        TableValuesTestTime(
             SimpleStringProperty("2 секция"),
             SimpleStringProperty("1.0"),
             SimpleStringProperty("2.0")
         ),
-        TableValuesTest4(
+        TableValuesTestTime(
             SimpleStringProperty("3 секция"),
             SimpleStringProperty("1.0"),
             SimpleStringProperty("2.0")
         ),
-        TableValuesTest4(
+        TableValuesTestTime(
             SimpleStringProperty("4 секция"),
             SimpleStringProperty("1.0"),
             SimpleStringProperty("2.0")
         ),
-        TableValuesTest4(
+        TableValuesTestTime(
             SimpleStringProperty("5 секция"),
             SimpleStringProperty("1.0"),
             SimpleStringProperty("2.0")
         ),
-        TableValuesTest4(
+        TableValuesTestTime(
             SimpleStringProperty("6 секция"),
             SimpleStringProperty("1.0"),
             SimpleStringProperty("2.0")
@@ -159,7 +171,7 @@ class MainViewController : TestController() {
                 view.buttonStop.isDisable = true
             }
             while (isAppRunning) {
-                if (owenPR.isResponding) {
+                if (CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding) {
                     runLater {
                         view.comIndicate.fill = State.OK.c
                     }
@@ -172,7 +184,6 @@ class MainViewController : TestController() {
             }
         }
     }
-
 
     var isDevicesResponding: () -> Boolean = {
         true
@@ -197,35 +208,35 @@ class MainViewController : TestController() {
 //                Toast.makeText("Выберите хотя бы одно испытание из списка").show(Toast.ToastType.ERROR)
 //            }
 //        } else {
-            thread(isDaemon = true) {
-                runLater {
-                    view.buttonStart.isDisable = true
-                    view.buttonStop.isDisable = false
-                    view.mainMenubar.isDisable = true
-                    view.checkBoxTest1.isDisable = true
-                    view.checkBoxTest2.isDisable = true
-                    view.checkBoxTest3.isDisable = true
-                }
-
-                isExperimentRunning = true
-                clearTable()
-
-                appendMessageToLog(LogTag.DEBUG, "Начало испытания")
-
-                Test1Controller().startTest()
-
-                appendMessageToLog(LogTag.MESSAGE, "Испытание завершено")
-
-                isExperimentRunning = false
-                runLater {
-                    view.buttonStart.isDisable = false
-                    view.buttonStop.isDisable = true
-                    view.mainMenubar.isDisable = false
-                    view.checkBoxTest1.isDisable = false
-                    view.checkBoxTest2.isDisable = false
-                    view.checkBoxTest3.isDisable = false
-                }
+        thread(isDaemon = true) {
+            runLater {
+                view.buttonStart.isDisable = true
+                view.buttonStop.isDisable = false
+                view.mainMenubar.isDisable = true
+                view.checkBoxTest1.isDisable = true
+                view.checkBoxTest2.isDisable = true
+                view.checkBoxTest3.isDisable = true
             }
+
+            isExperimentRunning = true
+            clearTable()
+
+            appendMessageToLog(LogTag.DEBUG, "Начало испытания")
+
+            Test1Controller().startTest()
+
+            appendMessageToLog(LogTag.MESSAGE, "Испытание завершено")
+
+            isExperimentRunning = false
+            runLater {
+                view.buttonStart.isDisable = false
+                view.buttonStop.isDisable = true
+                view.mainMenubar.isDisable = false
+                view.checkBoxTest1.isDisable = false
+                view.checkBoxTest2.isDisable = false
+                view.checkBoxTest3.isDisable = false
+            }
+        }
 //        }
     }
 

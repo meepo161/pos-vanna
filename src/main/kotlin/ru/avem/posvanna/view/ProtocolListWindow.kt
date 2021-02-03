@@ -1,41 +1,40 @@
 package ru.avem.posvanna.view
 
+import javafx.application.Platform
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.TableView
 import javafx.stage.FileChooser
+import javafx.stage.Modality
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.slf4j.LoggerFactory
 import ru.avem.posvanna.database.entities.Protocol
+import ru.avem.posvanna.database.entities.ProtocolSingle
+import ru.avem.posvanna.database.entities.ProtocolsSingleTable
 import ru.avem.posvanna.database.entities.ProtocolsTable
 import ru.avem.posvanna.protocol.saveProtocolAsWorkbook
+import ru.avem.posvanna.utils.Singleton
 import ru.avem.posvanna.utils.callKeyBoard
 import ru.avem.posvanna.utils.openFile
 import tornadofx.*
 import tornadofx.controlsfx.confirmNotification
 import java.io.File
 
-class ProtocolListWindow : View("Протоколы") {
-    companion object {
-        private val logger = LoggerFactory.getLogger(this::class.java)
-    }
-
+class ProtocolListWindow : View("Протоколы графиков") {
     private var tableViewProtocols: TableView<Protocol> by singleAssign()
     private lateinit var protocols: ObservableList<Protocol>
     override fun onDock() {
         protocols = transaction {
-            Protocol.all().toList().sortedByDescending { it.id }.asObservable()
+            Protocol.all().toList().asObservable()
         }
-
         tableViewProtocols.items = protocols
     }
 
+
     override val root = anchorpane {
-        prefWidth = 1200.0
-        prefHeight = 740.0
-        maxHeight = 720.0
+        prefWidth = 900.0
+        prefHeight = 500.0
 
         vbox(spacing = 16.0) {
             anchorpaneConstraints {
@@ -56,7 +55,7 @@ class ProtocolListWindow : View("Протоколы") {
 
                 onKeyReleased = EventHandler {
                     if (!text.isNullOrEmpty()) {
-                        tableViewProtocols.items = protocols.filter { it.factoryNumber.contains(text) }.asObservable()
+                        tableViewProtocols.items = protocols.filter { it.date.contains(text) }.asObservable()
                     } else {
                         tableViewProtocols.items = protocols
                     }
@@ -64,13 +63,14 @@ class ProtocolListWindow : View("Протоколы") {
             }
 
             tableViewProtocols = tableview {
+                protocols = transaction {
+                    Protocol.all().toList().asObservable()
+                }
+                items = protocols
                 prefHeight = 700.0
                 columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY)
-
-                column("Изделие", Protocol::factoryNumber)
-                column("Объект", Protocol::objectType)
                 column("Дата", Protocol::date)
-                column("Время", Protocol::dateTime)
+                column("Время", Protocol::time)
             }
 
             hbox(spacing = 16.0) {
@@ -79,15 +79,36 @@ class ProtocolListWindow : View("Протоколы") {
                 button("Открыть") {
                     action {
                         if (tableViewProtocols.selectedItem != null) {
-                            val protocol = transaction {
+                            Singleton.currentProtocol = transaction {
+                                Protocol.find {
+                                    ProtocolsTable.id eq tableViewProtocols.selectedItem!!.id
+                                }.toList().asObservable()
+                            }.first()
+                            saveProtocolAsWorkbook(Singleton.currentProtocol)
+                            close()
+                            openFile(File("protocol.xlsx"))
+                        }
+                    }
+                }
+                button("Открыть таблицу") {
+                    action {
+                        if (tableViewProtocols.selectedItem != null) {
+                            Singleton.currentProtocol = transaction {
                                 Protocol.find {
                                     ProtocolsTable.id eq tableViewProtocols.selectedItem!!.id
                                 }.toList().asObservable()
                             }.first()
 
-                            close()
-                            saveProtocolAsWorkbook(protocol)
-                            openFile(File("protocol.xlsx"))
+                            Singleton.currentProtocolSingle = transaction {
+                                ProtocolSingle.find {
+                                    ProtocolsSingleTable.id eq tableViewProtocols.selectedItem!!.id
+                                }.toList().asObservable()
+                            }.first()
+
+                            find<GraphHistoryWindow>().openModal(
+                                modality = Modality.APPLICATION_MODAL, escapeClosesWindow = true,
+                                resizable = true, owner = this@ProtocolListWindow.currentWindow
+                            )
                         }
                     }
                 }
@@ -105,12 +126,15 @@ class ProtocolListWindow : View("Протоколы") {
 
                             if (files.isNotEmpty()) {
                                 saveProtocolAsWorkbook(tableViewProtocols.selectedItem!!, files.first().absolutePath)
-                                confirmNotification(
-                                    "Готово",
-                                    "Успешно сохранено",
-                                    Pos.BOTTOM_CENTER,
-                                    owner = this@ProtocolListWindow.currentWindow
-                                )
+
+                                Platform.runLater {
+                                    confirmNotification(
+                                        "Готово",
+                                        "Успешно сохранено",
+                                        Pos.BOTTOM_CENTER,
+                                        owner = this@ProtocolListWindow.currentWindow
+                                    )
+                                }
                             }
                         }
                     }
@@ -129,12 +153,14 @@ class ProtocolListWindow : View("Протоколы") {
                                     val file = File(dir, "${it.id.value}.xlsx")
                                     saveProtocolAsWorkbook(it, file.absolutePath)
                                 }
-                                confirmNotification(
-                                    "Готово",
-                                    "Успешно сохранено",
-                                    Pos.BOTTOM_CENTER,
-                                    owner = this@ProtocolListWindow.currentWindow
-                                )
+                                Platform.runLater {
+                                    confirmNotification(
+                                        "Готово",
+                                        "Успешно сохранено",
+                                        Pos.BOTTOM_CENTER,
+                                        owner = this@ProtocolListWindow.currentWindow
+                                    )
+                                }
                             }
                         }
                     }
@@ -156,5 +182,5 @@ class ProtocolListWindow : View("Протоколы") {
                 }
             }
         }
-    }.addClass(Styles.extraHard, Styles.blueTheme)
+    }.addClass(Styles.hard)
 }

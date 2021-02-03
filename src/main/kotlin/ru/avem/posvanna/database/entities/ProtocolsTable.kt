@@ -7,46 +7,51 @@ import org.jetbrains.exposed.dao.IntIdTable
 
 object ProtocolsTable : IntIdTable() {
     val date = varchar("date", 256)
-    val dateTime = varchar("dateTime", 256)
-    val factoryNumber = varchar("factoryNumber", 256)
-    val objectType = varchar("objectType", 256)
-    val resistanceCoil1 = varchar("resistanceCoil1", 32)
-    val resistanceCoil2 = varchar("resistanceCoil2", 32)
-    val resistanceContactGroup1 = varchar("resistanceContactGroup1", 32)
-    val resistanceContactGroup2 = varchar("resistanceContactGroup2", 32)
-    val resistanceContactGroup3 = varchar("resistanceContactGroup3", 32)
-    val resistanceContactGroup4 = varchar("resistanceContactGroup4", 32)
-    val resistanceContactGroup5 = varchar("resistanceContactGroup5", 32)
-    val resistanceContactGroup6 = varchar("resistanceContactGroup6", 32)
-    val resistanceContactGroup7 = varchar("resistanceContactGroup7", 32)
-    val resistanceContactGroup8 = varchar("resistanceContactGroup8", 32)
-    val voltageMin = varchar("voltageMin", 32)
-    val voltageMax = varchar("voltageMax", 32)
-    val timeOff = varchar("timeOff", 32)
+    val time = varchar("time", 256)
+    val temp11 =  varchar("temp11", 99999999)
+    val temp12 =  varchar("temp12", 99999999)
+    val temp13 =  varchar("temp13", 99999999)
+    val temp14 =  varchar("temp14", 99999999)
+    val temp15 =  varchar("temp15", 99999999)
+    val temp16 =  varchar("temp16", 99999999)
+    val temp21 =  varchar("temp21", 99999999)
+    val temp22 =  varchar("temp22", 99999999)
+    val temp23 =  varchar("temp23", 99999999)
+    val temp24 =  varchar("temp24", 99999999)
+    val temp25 =  varchar("temp25", 99999999)
+    val temp26 =  varchar("temp26", 99999999)
+    val temp31 =  varchar("temp31", 99999999)
+    val temp32 =  varchar("temp32", 99999999)
+    val temp33 =  varchar("temp33", 99999999)
+    val temp34 =  varchar("temp34", 99999999)
+    val temp35 =  varchar("temp35", 99999999)
+    val temp36 =  varchar("temp36", 99999999)
 }
 
 class Protocol(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Protocol>(ProtocolsTable)
-
     var date by ProtocolsTable.date
-    var dateTime    by ProtocolsTable.dateTime
-    var factoryNumber by ProtocolsTable.factoryNumber
-    var objectType by ProtocolsTable.objectType
-    var resistanceCoil1 by ProtocolsTable.resistanceCoil1
-    var resistanceCoil2 by ProtocolsTable.resistanceCoil2
-    var resistanceContactGroup1 by ProtocolsTable.resistanceContactGroup1
-    var resistanceContactGroup2 by ProtocolsTable.resistanceContactGroup2
-    var resistanceContactGroup3 by ProtocolsTable.resistanceContactGroup3
-    var resistanceContactGroup4 by ProtocolsTable.resistanceContactGroup4
-    var resistanceContactGroup5 by ProtocolsTable.resistanceContactGroup5
-    var resistanceContactGroup6 by ProtocolsTable.resistanceContactGroup6
-    var resistanceContactGroup7 by ProtocolsTable.resistanceContactGroup7
-    var resistanceContactGroup8 by ProtocolsTable.resistanceContactGroup8
-    var voltageMin by ProtocolsTable.voltageMin
-    var voltageMax by ProtocolsTable.voltageMax
-    var timeOff by ProtocolsTable.timeOff
+    var time by ProtocolsTable.time
+    var temp11 by ProtocolsTable.temp11
+    var temp12 by ProtocolsTable.temp12
+    var temp13 by ProtocolsTable.temp13
+    var temp14 by ProtocolsTable.temp14
+    var temp15 by ProtocolsTable.temp15
+    var temp16 by ProtocolsTable.temp16
+    var temp21 by ProtocolsTable.temp21
+    var temp22 by ProtocolsTable.temp22
+    var temp23 by ProtocolsTable.temp23
+    var temp24 by ProtocolsTable.temp24
+    var temp25 by ProtocolsTable.temp25
+    var temp26 by ProtocolsTable.temp26
+    var temp31 by ProtocolsTable.temp31
+    var temp32 by ProtocolsTable.temp32
+    var temp33 by ProtocolsTable.temp33
+    var temp34 by ProtocolsTable.temp34
+    var temp35 by ProtocolsTable.temp35
+    var temp36 by ProtocolsTable.temp36
 
     override fun toString(): String {
-        return "$id. $factoryNumber:$objectType - $date"
+        return "$id"
     }
 }

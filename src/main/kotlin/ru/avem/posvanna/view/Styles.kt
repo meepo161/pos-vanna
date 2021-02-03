@@ -87,7 +87,7 @@ class Styles : Stylesheet() {
         stopStart {
             fontSize = 60.px
             fontWeight = FontWeight.EXTRA_BOLD
-            baseColor = c("#333")
+//            baseColor = c("#333")
         }
 
         powerButtons {

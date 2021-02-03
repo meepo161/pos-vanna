@@ -2,10 +2,19 @@ package ru.avem.posvanna.entities
 
 import javafx.beans.property.StringProperty
 
-data class TableValuesTest0(
-        var descriptor: StringProperty,
-        var descriptor2: StringProperty,
-        var descriptor3: StringProperty
+data class TableValuesTest21(
+        var voltage: StringProperty,
+        var ampere: StringProperty
+)
+
+data class TableValuesTest22(
+        var voltage: StringProperty,
+        var ampere: StringProperty
+)
+
+data class TableValuesTest23(
+        var voltage: StringProperty,
+        var ampere: StringProperty
 )
 
 data class TableValuesTest1(
@@ -23,7 +32,7 @@ data class TableValuesTest3(
         var section31t: StringProperty
 )
 
-data class TableValuesTest4(
+data class TableValuesTestTime(
         var descriptor: StringProperty,
         var start: StringProperty,
         var pause: StringProperty
