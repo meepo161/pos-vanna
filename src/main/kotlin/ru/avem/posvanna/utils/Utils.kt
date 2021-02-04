@@ -189,3 +189,8 @@ fun toHHmmss(time: Long): String {
 }
 
 private fun padZero(d: Int) = d.toString().padStart(2, '0')
+
+fun callKeyBoard() {
+    Desktop.getDesktop()
+        .open(Paths.get("C:/Program Files/Common Files/Microsoft Shared/ink/TabTip.exe").toFile())
+}

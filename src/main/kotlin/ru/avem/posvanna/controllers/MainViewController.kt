@@ -185,59 +185,52 @@ class MainViewController : Controller() {
         }
     }
 
-    var isDevicesResponding: () -> Boolean = {
-        true
-    }
+    var isDevicesResponding = CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding
+            && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.PARMA1).isResponding
+            && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM1).isResponding
+            && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM2).isResponding
+            && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM3).isResponding
 
     @UseExperimental(ExperimentalTime::class)
     fun handleStartTest() {
-//        if (view.textFieldTimeStart1.text.isEmpty() || !view.textFieldTimeStart1.text.isDouble()) {
-//            runLater {
-//                Toast.makeText("Введите время нагрева").show(Toast.ToastType.ERROR)
-//            }
-//        } else if (view.textFieldTimePause1.text.isEmpty() || !view.textFieldTimePause1.text.isDouble()) {
-//            runLater {
-//                Toast.makeText("Введите время паузы").show(Toast.ToastType.ERROR)
-//            }
-//        } else if (view.textFieldTimeCycle.text.isEmpty() || !view.textFieldTimeCycle.text.isDouble()) {
-//            runLater {
-//                Toast.makeText("Введите количество циклов").show(Toast.ToastType.ERROR)
-//            }
-//        } else if (!isAtLeastOneIsSelected()) {
-//            runLater {
-//                Toast.makeText("Выберите хотя бы одно испытание из списка").show(Toast.ToastType.ERROR)
-//            }
-//        } else {
-        thread(isDaemon = true) {
+        if (view.textFieldTimeCycle.text.isEmpty() || !view.textFieldTimeCycle.text.isDouble()) {
             runLater {
-                view.buttonStart.isDisable = true
-                view.buttonStop.isDisable = false
-                view.mainMenubar.isDisable = true
-                view.checkBoxTest1.isDisable = true
-                view.checkBoxTest2.isDisable = true
-                view.checkBoxTest3.isDisable = true
+                Toast.makeText("Введите количество циклов").show(Toast.ToastType.ERROR)
             }
-
-            isExperimentRunning = true
-            clearTable()
-
-            appendMessageToLog(LogTag.DEBUG, "Начало испытания")
-
-            Test1Controller().startTest()
-
-            appendMessageToLog(LogTag.MESSAGE, "Испытание завершено")
-
-            isExperimentRunning = false
+        } else if (!isAtLeastOneIsSelected()) {
             runLater {
-                view.buttonStart.isDisable = false
-                view.buttonStop.isDisable = true
-                view.mainMenubar.isDisable = false
-                view.checkBoxTest1.isDisable = false
-                view.checkBoxTest2.isDisable = false
-                view.checkBoxTest3.isDisable = false
+                Toast.makeText("Выберите хотя бы один объект испытания").show(Toast.ToastType.ERROR)
+            }
+        } else {
+            thread(isDaemon = true) {
+                runLater {
+                    view.buttonStart.isDisable = true
+                    view.buttonStop.isDisable = false
+                    view.mainMenubar.isDisable = true
+                    view.checkBoxTest1.isDisable = true
+                    view.checkBoxTest2.isDisable = true
+                    view.checkBoxTest3.isDisable = true
+                }
+
+                isExperimentRunning = true
+
+                appendMessageToLog(LogTag.DEBUG, "Начало испытания")
+
+                Test1Controller().startTest()
+
+                appendMessageToLog(LogTag.MESSAGE, "Испытание завершено")
+
+                isExperimentRunning = false
+                runLater {
+                    view.buttonStart.isDisable = false
+                    view.buttonStop.isDisable = true
+                    view.mainMenubar.isDisable = false
+                    view.checkBoxTest1.isDisable = false
+                    view.checkBoxTest2.isDisable = false
+                    view.checkBoxTest3.isDisable = false
+                }
             }
         }
-//        }
     }
 
     fun handleStopTest() {
@@ -263,12 +256,6 @@ class MainViewController : Controller() {
         return view.checkBoxTest1.isSelected ||
                 view.checkBoxTest2.isSelected ||
                 view.checkBoxTest3.isSelected
-    }
-
-    fun clearTable() {
-        runLater {
-            tableValuesTest2[1].section21t.value = ""
-        }
     }
 
     fun showAboutUs() {

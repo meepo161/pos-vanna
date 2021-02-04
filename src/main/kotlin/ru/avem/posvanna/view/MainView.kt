@@ -9,6 +9,7 @@ import javafx.scene.shape.Circle
 import javafx.stage.Modality
 import ru.avem.posvanna.controllers.MainViewController
 import ru.avem.posvanna.entities.*
+import ru.avem.posvanna.utils.callKeyBoard
 import ru.avem.posvanna.view.Styles.Companion.extraHard
 import ru.avem.posvanna.view.Styles.Companion.megaHard
 import ru.avem.posvanna.view.Styles.Companion.stopStart
@@ -96,17 +97,23 @@ class MainView : View("Комплексный стенд для испытани
                                 alignmentProperty().set(Pos.CENTER)
                                 label("Количество циклов:").addClass(extraHard)
                                 textFieldTimeCycle = textfield {
+                                    callKeyBoard()
                                     text = ""
                                     prefWidth = 100.0
                                     alignment = Pos.CENTER
                                 }.addClass(extraHard)
                             }
                             tableview(controller.tableValuesTestTime) {
+
                                 minHeight = 346.0
                                 maxHeight = 346.0
                                 minWidth = 500.0
                                 prefWidth = 500.0
                                 columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
+
+                                onEditStart {
+                                    callKeyBoard()
+                                }
                                 column("", TableValuesTestTime::descriptor.getter)
                                 column("Нагрев, мин", TableValuesTestTime::start.getter).makeEditable()
                                 column("Пауза, мин", TableValuesTestTime::pause.getter).makeEditable()

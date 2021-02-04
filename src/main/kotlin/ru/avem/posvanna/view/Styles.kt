@@ -35,10 +35,10 @@ class Styles : Stylesheet() {
         }
 
         blueTheme {
-//            baseColor = c("#0f4c81")
-//            baseColor = c("#444")
-//            accentColor = c("#f88379")
-//            focusColor = Paint.valueOf("#f88379")
+            baseColor = c("#0f4c81")
+            baseColor = c("#444")
+            accentColor = c("#f88379")
+            focusColor = Paint.valueOf("#f88379")
         }
 
         tabPane {

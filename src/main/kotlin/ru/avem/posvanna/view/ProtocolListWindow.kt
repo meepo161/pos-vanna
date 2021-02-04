@@ -106,7 +106,7 @@ class ProtocolListWindow : View("Протоколы графиков") {
                             }.first()
 
                             find<GraphHistoryWindow>().openModal(
-                                modality = Modality.APPLICATION_MODAL, escapeClosesWindow = true,
+                                modality = Modality.WINDOW_MODAL, escapeClosesWindow = true,
                                 resizable = true, owner = this@ProtocolListWindow.currentWindow
                             )
                         }

@@ -21,7 +21,7 @@ class Pos : App(MainView::class, Styles::class) {
     }
 
     override fun start(stage: Stage) {
-        stage.isFullScreen = false
+        stage.isFullScreen = true
         stage.isResizable = true
 //        stage.initStyle(StageStyle.TRANSPARENT)
         stage.fullScreenExitKeyCombination = KeyCombination.NO_MATCH
