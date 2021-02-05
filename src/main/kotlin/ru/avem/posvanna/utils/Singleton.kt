@@ -7,6 +7,5 @@ import ru.avem.posvanna.database.entities.TestObjectsType
 
 object Singleton {
     lateinit var currentProtocol: Protocol
-    lateinit var currentProtocolSingle: ProtocolSingle
     lateinit var currentTestItem: TestObjectsType
 }

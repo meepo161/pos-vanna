@@ -130,7 +130,7 @@ fun fillParameters(wb: XSSFWorkbook, dots: String, start: Int, end: Int) {
     val sheet = wb.getSheetAt(0)
     var row: Row
     var cellStyle: XSSFCellStyle = generateStyles(wb) as XSSFCellStyle
-    var rowNum = sheet.lastRowNum - 1
+    var rowNum = sheet.lastRowNum + 1
     row = sheet.createRow(rowNum)
     var columnNum = 0
     for (i in values.indices) {

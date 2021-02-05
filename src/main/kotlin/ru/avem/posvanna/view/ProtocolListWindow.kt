@@ -99,11 +99,6 @@ class ProtocolListWindow : View("Протоколы графиков") {
                                 }.toList().asObservable()
                             }.first()
 
-                            Singleton.currentProtocolSingle = transaction {
-                                ProtocolSingle.find {
-                                    ProtocolsSingleTable.id eq tableViewProtocols.selectedItem!!.id
-                                }.toList().asObservable()
-                            }.first()
 
                             find<GraphHistoryWindow>().openModal(
                                 modality = Modality.WINDOW_MODAL, escapeClosesWindow = true,

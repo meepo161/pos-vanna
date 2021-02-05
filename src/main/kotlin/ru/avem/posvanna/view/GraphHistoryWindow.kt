@@ -284,9 +284,8 @@ class GraphHistoryWindow : View("История графика") {
                 }
             }
             lineChart.xAxis.isAutoRanging = true
-//            sliderOt.value.toInt().toString()
-//            tfOt.text = sliderOt.value.toInt().toString()
-//            tfDo.text = sliderDo.value.toInt().toString()
+            sliderOt.value = tfOt.text.toDouble()
+            sliderDo.value = tfDo.text.toDouble()
         } else {
             Platform.runLater {
                 errorNotification(
