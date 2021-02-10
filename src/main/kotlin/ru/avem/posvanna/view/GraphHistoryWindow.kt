@@ -51,19 +51,23 @@ class GraphHistoryWindow : View("История графика") {
         "3 лопасть 3 секция",
         "3 лопасть 4 секция",
         "3 лопасть 5 секция",
-        "3 лопасть 6 секция"
+        "3 лопасть 6 секция",
+        "Вода"
     )
     private var listOfValues = mutableListOf<String>()
 
     override fun onDock() {
         comboBoxTestItem.selectionModel.selectFirst()
         createLineChart("1 лопасть 1 секция")
+        values = Singleton.currentProtocol.temp11.removePrefix("[").removeSuffix("]")
+            .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
         selectedItemProperty.onChange {
             createLineChart(it)
             handleOk()
         }
         tfOt.text = "0"
-        tfDo.text = "0"
+        tfDo.text = (values.size).toString()
+        handleOk()
     }
 
     override val root = anchorpane {
@@ -207,6 +211,9 @@ class GraphHistoryWindow : View("История графика") {
             "3 лопасть 6 секция" ->
                 values = Singleton.currentProtocol.temp36.removePrefix("[").removeSuffix("]")
                     .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+            "Вода" ->
+                values = Singleton.currentProtocol.temp17.removePrefix("[").removeSuffix("]")
+                    .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
         }
 
         sliderOt.max = values.size.toDouble()
@@ -313,7 +320,7 @@ class GraphHistoryWindow : View("История графика") {
                     do1 = values.size.toDouble()
                     tfDo.text = (values.size).toString()
                 }
-                for (i in ot1.toInt()..do1.toInt()) {
+                for (i in ot1.toInt() until do1.toInt()) {
                     listOfValues.add(String.format("%.1f", values[i]))
                 }
 

@@ -17,7 +17,6 @@ import tornadofx.style
 import java.text.SimpleDateFormat
 import kotlin.concurrent.thread
 import kotlin.experimental.and
-import kotlin.random.Random
 import kotlin.time.ExperimentalTime
 
 class Test1Controller : TestController() {
@@ -108,16 +107,7 @@ class Test1Controller : TestController() {
 
     //region переменные для защит ПР
     @Volatile
-    private var doorShkaf: Boolean = false
-
-    @Volatile
     private var doorZone1: Boolean = false
-
-    @Volatile
-    private var doorZone2: Boolean = false
-
-    @Volatile
-    private var doorZone3: Boolean = false
 
     @Volatile
     private var startButton: Boolean = false
@@ -133,6 +123,63 @@ class Test1Controller : TestController() {
 
     @Volatile
     private var currentI3: Boolean = false
+
+    @Volatile
+    private var trmStatus11: Boolean = false
+
+    @Volatile
+    private var trmStatus12: Boolean = false
+
+    @Volatile
+    private var trmStatus13: Boolean = false
+
+    @Volatile
+    private var trmStatus14: Boolean = false
+
+    @Volatile
+    private var trmStatus15: Boolean = false
+
+    @Volatile
+    private var trmStatus16: Boolean = false
+
+    @Volatile
+    private var trmStatus17: Boolean = false
+
+    @Volatile
+    private var trmStatus21: Boolean = false
+
+    @Volatile
+    private var trmStatus22: Boolean = false
+
+    @Volatile
+    private var trmStatus23: Boolean = false
+
+    @Volatile
+    private var trmStatus24: Boolean = false
+
+    @Volatile
+    private var trmStatus25: Boolean = false
+
+    @Volatile
+    private var trmStatus26: Boolean = false
+
+    @Volatile
+    private var trmStatus31: Boolean = false
+
+    @Volatile
+    private var trmStatus32: Boolean = false
+
+    @Volatile
+    private var trmStatus33: Boolean = false
+
+    @Volatile
+    private var trmStatus34: Boolean = false
+
+    @Volatile
+    private var trmStatus35: Boolean = false
+
+    @Volatile
+    private var trmStatus36: Boolean = false
     //endregion
 
     private var cycles: Int = 0
@@ -144,6 +191,7 @@ class Test1Controller : TestController() {
     private var listOfValues14 = mutableListOf<String>()
     private var listOfValues15 = mutableListOf<String>()
     private var listOfValues16 = mutableListOf<String>()
+    private var listOfValues17 = mutableListOf<String>()
     private var listOfValues21 = mutableListOf<String>()
     private var listOfValues22 = mutableListOf<String>()
     private var listOfValues23 = mutableListOf<String>()
@@ -180,43 +228,21 @@ class Test1Controller : TestController() {
         }
     }
 
+    fun isDevicesResponding(): Boolean {
+        return CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding
+    }
+
     private fun startPollDevices() {
         //region pr pool
         CommunicationModel.startPoll(CommunicationModel.DeviceID.DD2, OwenPrModel.FIXED_STATES_REGISTER_1) { value ->
-            doorShkaf = value.toShort() and 1 > 0
             doorZone1 = value.toShort() and 2 > 0
-            doorZone2 = value.toShort() and 4 > 0
-            doorZone3 = value.toShort() and 8 > 0
-            startButton = value.toShort() and 32 > 0
-            stopButton = value.toShort() and 64 > 0
-            if (doorShkaf) {
-                controller.cause = "Открыта дверь шкафа"
-            }
+            stopButton = value.toShort() and 32 > 0
+            startButton = value.toShort() and 64 > 0
             if (doorZone1) {
-                controller.cause = "Открыта дверь зоны 1"
-            }
-            if (doorZone2) {
-                controller.cause = "Открыта дверь зоны 2 "
-            }
-            if (doorZone3) {
-                controller.cause = "Открыта дверь зоны 3 "
+                controller.cause = "Открыта дверь зоны"
             }
             if (stopButton) {
-                controller.cause = "Нажали кнопку СТОП"
-            }
-        }
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.DD2, OwenPrModel.FIXED_STATES_REGISTER_2) { value ->
-            currentI1 = value.toShort() and 1 > 0
-            currentI2 = value.toShort() and 2 > 0
-            currentI3 = value.toShort() and 4 > 0
-            if (currentI1) {
-                controller.cause = "Токовая защита лопасти 1"
-            }
-            if (currentI2) {
-                controller.cause = "Токовая защита лопасти 2"
-            }
-            if (currentI3) {
-                controller.cause = "Токовая защита лопасти 3"
+                controller.cause = "Нажата кнопка Стоп"
             }
         }
         //endregion
@@ -369,448 +395,703 @@ class Test1Controller : TestController() {
 
     @ExperimentalTime
     fun startTest() {
-        controller.cause = ""
-
-        isExperimentEnded = false
-
-        if (controller.isExperimentRunning) {
-            appendMessageToLog(LogTag.DEBUG, "Инициализация устройств")
-        }
-
-        var timeToPrepare = 300
-        while (!controller.isDevicesResponding && controller.isExperimentRunning && timeToPrepare-- > 0) {
-            CommunicationModel.checkDevices()
-            sleep(100)
-        }
-
-        if (!controller.isDevicesResponding) {
-            controller.cause = "Не отвечают приборы"
-        }
-
-        if (controller.isExperimentRunning && controller.isDevicesResponding) {
-            CommunicationModel.addWritingRegister(
-                CommunicationModel.DeviceID.DD2,
-                OwenPrModel.RESET_DOG,
-                1.toShort()
-            )
-            owenPR.initOwenPR()
-            sleep(1000)
-            startPollDevices()
-            sleep(1000)
-        }
-
-        if (controller.isExperimentRunning) {
-            getValuesInTable()
-        }
-
-        if (!startButton && controller.isExperimentRunning && controller.isDevicesResponding) {
-            runLater {
-                Toast.makeText("Нажмите кнопку ПУСК").show(Toast.ToastType.WARNING)
-            }
-        }
-        var timeToStart = 300
-        while (!startButton && controller.isExperimentRunning && controller.isDevicesResponding && timeToStart-- > 0) {
-            appendOneMessageToLog(LogTag.DEBUG, "Нажмите кнопку ПУСК")
-            sleep(100)
-        }
-
-        if (!startButton) {
-            controller.cause = "Не нажата кнопка ПУСК"
-        }
-
-        if (controller.isExperimentRunning && controller.isDevicesResponding) {
-            appendMessageToLog(LogTag.DEBUG, "Подготовка стенда")
-            appendMessageToLog(LogTag.DEBUG, "Сбор схемы")
-        }
-
-        cycles = mainView.textFieldTimeCycle.text.toInt()
-
-        val allTime =
-            ((controller.tableValuesTestTime[0].start.value.toDouble() * 60) + (controller.tableValuesTestTime[0].pause.value.toDouble() * 60) +
-                    (controller.tableValuesTestTime[1].start.value.toDouble() * 60) + (controller.tableValuesTestTime[1].pause.value.toDouble() * 60) +
-                    (controller.tableValuesTestTime[2].start.value.toDouble() * 60) + (controller.tableValuesTestTime[2].pause.value.toDouble() * 60) +
-                    (controller.tableValuesTestTime[3].start.value.toDouble() * 60) + (controller.tableValuesTestTime[3].pause.value.toDouble() * 60) +
-                    (controller.tableValuesTestTime[4].start.value.toDouble() * 60) + (controller.tableValuesTestTime[4].pause.value.toDouble() * 60) +
-                    (controller.tableValuesTestTime[5].start.value.toDouble() * 60) + (controller.tableValuesTestTime[5].pause.value.toDouble() * 60)
-                    * mainView.textFieldTimeCycle.text.toDouble()).toInt()
-        CallbackTimer(
-            tickPeriod = 1.seconds, tickTimes = allTime,
-            tickJob = {
-                if (!controller.isExperimentRunning) it.stop()
-                runLater {
-                    mainView.labelTimeRemaining.text =
-                        "Осталось всего: " + toHHmmss((allTime - it.getCurrentTicks()) * 1000L)
-                }
-            },
-            onFinishJob = {
-            })
-
-        if (controller.isExperimentRunning) {
-            startRecordValues()
-        }
-
-        while (controller.isExperimentRunning && controller.isDevicesResponding && cycles-- > 0) {
-
-            if (mainView.checkBoxTest1.isSelected) {
-                owenPR.on11()
-            }
-            if (mainView.checkBoxTest2.isSelected) {
-                owenPR.on21()
-            }
-            if (mainView.checkBoxTest3.isSelected) {
-                owenPR.on31()
-            }
-
-            val timeStart1 = (controller.tableValuesTestTime[0].start.value.toDouble() * 60).toInt()
-            val callbackTimerStart1 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timeStart1,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: нагрев 1 cекции. Осталось: " + toHHmmss((timeStart1 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerStart1.isRunning && controller.isDevicesResponding) {
-                sleep(100)
-            }
-
-            owenPR.offAllKMs()
-
-
-            val timePause1 = (controller.tableValuesTestTime[0].pause.value.toDouble() * 60 * 60).toInt()
-            val callbackTimerPause1 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timePause1,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: пауза 1 cекции. Осталось: " + toHHmmss((timePause1 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerPause1.isRunning) {
-                sleep(100)
-            }
-            owenPR.offAllKMs()
-
-            if (mainView.checkBoxTest1.isSelected) {
-                owenPR.on12()
-            }
-            if (mainView.checkBoxTest2.isSelected) {
-                owenPR.on22()
-            }
-            if (mainView.checkBoxTest3.isSelected) {
-                owenPR.on32()
-            }
-
-            val timeStart2 = (controller.tableValuesTestTime[0].start.value.toDouble() * 60).toInt()
-            val callbackTimerStart2 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timeStart2,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: нагрев 1 cекции. Осталось: " + toHHmmss((timeStart2 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerStart2.isRunning && controller.isDevicesResponding) {
-                sleep(100)
-            }
-
-            owenPR.offAllKMs()
-
-
-            val timePause2 = (controller.tableValuesTestTime[0].pause.value.toDouble() * 60 * 60).toInt()
-            val callbackTimerPause2 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timePause2,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: пауза 1 cекции. Осталось: " + toHHmmss((timePause2 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerPause2.isRunning) {
-                sleep(100)
-            }
-            owenPR.offAllKMs()
-
-            if (mainView.checkBoxTest1.isSelected) {
-                owenPR.on13()
-            }
-            if (mainView.checkBoxTest2.isSelected) {
-                owenPR.on23()
-            }
-            if (mainView.checkBoxTest3.isSelected) {
-                owenPR.on33()
-            }
-
-            val timeStart3 = (controller.tableValuesTestTime[0].start.value.toDouble() * 60).toInt()
-            val callbackTimerStart3 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timeStart3,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: нагрев 3 cекции. Осталось: " + toHHmmss((timeStart3 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerStart3.isRunning && controller.isDevicesResponding) {
-                sleep(100)
-            }
-
-            owenPR.offAllKMs()
-
-
-            val timePause3 = (controller.tableValuesTestTime[0].pause.value.toDouble() * 60 * 60).toInt()
-            val callbackTimerPause3 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timePause3,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: пауза 3 cекции. Осталось: " + toHHmmss((timePause3 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerPause3.isRunning) {
-                sleep(100)
-            }
-            owenPR.offAllKMs()
-
-            if (mainView.checkBoxTest1.isSelected) {
-                owenPR.on14()
-            }
-            if (mainView.checkBoxTest2.isSelected) {
-                owenPR.on24()
-            }
-            if (mainView.checkBoxTest3.isSelected) {
-                owenPR.on34()
-            }
-
-            val timeStart4 = (controller.tableValuesTestTime[0].start.value.toDouble() * 60).toInt()
-            val callbackTimerStart4 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timeStart4,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: нагрев 4 cекции. Осталось: " + toHHmmss((timeStart4 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerStart4.isRunning && controller.isDevicesResponding) {
-                sleep(100)
-            }
-
-            owenPR.offAllKMs()
-
-
-            val timePause4 = (controller.tableValuesTestTime[0].pause.value.toDouble() * 60 * 60).toInt()
-            val callbackTimerPause4 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timePause4,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: пауза 4 cекции. Осталось: " + toHHmmss((timePause4 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerPause4.isRunning) {
-                sleep(100)
-            }
-            owenPR.offAllKMs()
-
-            if (mainView.checkBoxTest1.isSelected) {
-                owenPR.on15()
-            }
-            if (mainView.checkBoxTest2.isSelected) {
-                owenPR.on25()
-            }
-            if (mainView.checkBoxTest3.isSelected) {
-                owenPR.on35()
-            }
-
-            val timeStart5 = (controller.tableValuesTestTime[0].start.value.toDouble() * 60).toInt()
-            val callbackTimerStart5 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timeStart5,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: нагрев 5 cекции. Осталось: " + toHHmmss((timeStart5 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerStart5.isRunning && controller.isDevicesResponding) {
-                sleep(100)
-            }
-
-            owenPR.offAllKMs()
-
-
-            val timePause5 = (controller.tableValuesTestTime[0].pause.value.toDouble() * 60 * 60).toInt()
-            val callbackTimerPause5 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timePause5,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: пауза 5 cекции. Осталось: " + toHHmmss((timePause5 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerPause5.isRunning) {
-                sleep(100)
-            }
-            owenPR.offAllKMs()
-
-            if (mainView.checkBoxTest1.isSelected) {
-                owenPR.on16()
-            }
-            if (mainView.checkBoxTest2.isSelected) {
-                owenPR.on26()
-            }
-            if (mainView.checkBoxTest3.isSelected) {
-                owenPR.on36()
-            }
-
-            val timeStart6 = (controller.tableValuesTestTime[0].start.value.toDouble() * 60).toInt()
-            val callbackTimerStart6 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timeStart6,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: нагрев 6 cекции. Осталось: " + toHHmmss((timeStart6 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerStart6.isRunning && controller.isDevicesResponding) {
-                sleep(100)
-            }
-
-            owenPR.offAllKMs()
-
-
-            val timePause6 = (controller.tableValuesTestTime[0].pause.value.toDouble() * 60 * 60).toInt()
-            val callbackTimerPause6 = CallbackTimer(
-                tickPeriod = 1.seconds, tickTimes = timePause6,
-                tickJob = {
-                    if (!controller.isExperimentRunning) {
-                        it.stop()
-                    } else {
-                        runLater {
-                            mainView.labelTestStatus.text =
-                                "Статус: пауза 6 cекции. Осталось: " + toHHmmss((timePause6 - it.getCurrentTicks()) * 1000L)
-                        }
-                    }
-                },
-                onFinishJob = {
-                })
-
-            while (controller.isExperimentRunning && callbackTimerPause6.isRunning) {
-                sleep(100)
-            }
-            owenPR.offAllKMs()
-        }
-
-        if (listOfValues11.isNotEmpty()) {
-            saveProtocolToDB()
-        }
-
-        owenPR.offAllKMs()
-        setResult()
-
-        finalizeExperiment()
-        runLater {
-            mainView.labelTestStatus.text = "Статус: стоп"
-        }
-    }
-
-    private fun startRecordValues() {
         thread(isDaemon = true) {
-            while (cycles > 0 && controller.isExperimentRunning) {
-                listOfValues11.add(String.format("%.1f", measuringt11))
-                listOfValues12.add(String.format("%.1f", measuringt12))
-                listOfValues13.add(String.format("%.1f", measuringt13))
-                listOfValues14.add(String.format("%.1f", measuringt14))
-                listOfValues15.add(String.format("%.1f", measuringt15))
-                listOfValues16.add(String.format("%.1f", measuringt16))
-                listOfValues21.add(String.format("%.1f", measuringt21))
-                listOfValues22.add(String.format("%.1f", measuringt22))
-                listOfValues23.add(String.format("%.1f", measuringt23))
-                listOfValues24.add(String.format("%.1f", measuringt24))
-                listOfValues25.add(String.format("%.1f", measuringt25))
-                listOfValues26.add(String.format("%.1f", measuringt26))
-                listOfValues31.add(String.format("%.1f", measuringt31))
-                listOfValues32.add(String.format("%.1f", measuringt32))
-                listOfValues33.add(String.format("%.1f", measuringt33))
-                listOfValues34.add(String.format("%.1f", measuringt34))
-                listOfValues35.add(String.format("%.1f", measuringt35))
-                listOfValues36.add(String.format("%.1f", measuringt36))
+            runLater {
+                mainView.buttonStop.isDisable = false
+                mainView.buttonStart.isDisable = true
+            }
+            controller.cause = ""
+            controller.isExperimentRunning = true
+            isExperimentEnded = false
+            appendMessageToLog(LogTag.DEBUG, "Начало испытания")
+            sleep(1000)
+
+            runLater {
+                mainView.labelTestStatus.text = ""
+                mainView.labelTestStatusEnd1.text = ""
+                mainView.labelTimeRemaining.text = ""
+                mainView.textFieldTimeCycle.isDisable = true
+                mainView.tableViewTestTime.isDisable = true
+                mainView.buttonStop.isDisable = false
+                mainView.buttonStart.isDisable = true
+                mainView.checkBoxTest1.isDisable = true
+                mainView.checkBoxTest2.isDisable = true
+                mainView.checkBoxTest3.isDisable = true
+            }
+
+            if (controller.isExperimentRunning) {
+                startPollDevices()
+                appendMessageToLog(LogTag.DEBUG, "Инициализация устройств")
                 sleep(1000)
+            }
+
+            var timeToPrepare = 100
+            while (!controller.isDevicesResponding() && controller.isExperimentRunning && timeToPrepare-- > 0) {
+                sleep(100)
+            }
+
+            if (!controller.isDevicesResponding()) {
+                var cause = ""
+                cause += "Не отвечают приборы: "
+                if (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding) {
+                    cause += "ПР "
+                }
+                if (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM1).isResponding) {
+                    cause += "ТРМ1 "
+                }
+                if (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM2).isResponding) {
+                    cause += "ТРМ2 "
+                }
+                if (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM3).isResponding) {
+                    cause += "ТРМ3 "
+                }
+                controller.cause = cause
+            }
+
+            if (controller.isExperimentRunning && controller.isDevicesResponding()) {
+                CommunicationModel.addWritingRegister(
+                    CommunicationModel.DeviceID.DD2,
+                    OwenPrModel.RESET_DOG,
+                    1.toShort()
+                )
+                owenPR.initOwenPR()
+                startPollDevices()
+                sleep(1000)
+            }
+
+
+            if (!startButton && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                runLater {
+                    Toast.makeText("Нажмите кнопку ПУСК").show(Toast.ToastType.WARNING)
+                }
+            }
+
+            var timeToStart = 300
+            while (!startButton && controller.isExperimentRunning && controller.isDevicesResponding() && timeToStart-- > 0) {
+                appendOneMessageToLog(LogTag.DEBUG, "Нажмите кнопку ПУСК")
+                sleep(100)
+            }
+
+            if (!startButton && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                controller.cause = "Не нажата кнопка ПУСК"
+            }
+
+            if (controller.isExperimentRunning && controller.isDevicesResponding()) {
+                appendMessageToLog(LogTag.DEBUG, "Подготовка стенда")
+                startValues()
+                sleep(2000)
+                appendMessageToLog(LogTag.DEBUG, "Ожидайте завершения...")
+            }
+
+            cycles = mainView.textFieldTimeCycle.text.toInt()
+
+            val allTime =
+                (((controller.tableValuesTestTime[0].start.value.toDouble() * 60) + (controller.tableValuesTestTime[0].pause.value.toDouble() * 60) +
+                        (controller.tableValuesTestTime[1].start.value.toDouble() * 60) + (controller.tableValuesTestTime[1].pause.value.toDouble() * 60) +
+                        (controller.tableValuesTestTime[2].start.value.toDouble() * 60) + (controller.tableValuesTestTime[2].pause.value.toDouble() * 60) +
+                        (controller.tableValuesTestTime[3].start.value.toDouble() * 60) + (controller.tableValuesTestTime[3].pause.value.toDouble() * 60) +
+                        (controller.tableValuesTestTime[4].start.value.toDouble() * 60) + (controller.tableValuesTestTime[4].pause.value.toDouble() * 60) +
+                        (controller.tableValuesTestTime[5].start.value.toDouble() * 60) + (controller.tableValuesTestTime[5].pause.value.toDouble() * 60))
+                        * mainView.textFieldTimeCycle.text.toDouble()).toInt()
+            CallbackTimer(
+                tickPeriod = 1.seconds, tickTimes = allTime,
+                tickJob = {
+                    if (!controller.isExperimentRunning) it.stop()
+                    runLater {
+                        mainView.labelTimeRemaining.text =
+                            "                   Осталось всего: " + toHHmmss((allTime - it.getCurrentTicks()) * 1000L)
+                        controller.tableValuesTest21[0].voltage.value = formatRealNumber(measuringUA).toString()
+                        controller.tableValuesTest21[0].ampere.value = formatRealNumber(measuringIA).toString()
+                        controller.tableValuesTest22[0].voltage.value = formatRealNumber(measuringUB).toString()
+                        controller.tableValuesTest22[0].ampere.value = formatRealNumber(measuringIB).toString()
+                        controller.tableValuesTest23[0].voltage.value = formatRealNumber(measuringUC).toString()
+                        controller.tableValuesTest23[0].ampere.value = formatRealNumber(measuringIC).toString()
+                        if (measuringt11 < -50 || measuringt11 > 100 || !trmStatus11) {
+                            controller.tableValuesTest1[0].section1t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest1[0].section1t.value = String.format("%.2f", measuringt11)
+                        }
+                        if (measuringt12 < -50 || measuringt12 > 100 || !trmStatus12) {
+                            controller.tableValuesTest1[1].section1t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest1[1].section1t.value = String.format("%.2f", measuringt12)
+                        }
+                        if (measuringt13 < -50 || measuringt13 > 100 || !trmStatus13) {
+                            controller.tableValuesTest1[2].section1t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest1[2].section1t.value = String.format("%.2f", measuringt13)
+                        }
+                        if (measuringt14 < -50 || measuringt14 > 100 || !trmStatus14) {
+                            controller.tableValuesTest1[3].section1t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest1[3].section1t.value = String.format("%.2f", measuringt14)
+                        }
+                        if (measuringt15 < -50 || measuringt15 > 100 || !trmStatus15) {
+                            controller.tableValuesTest1[4].section1t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest1[4].section1t.value = String.format("%.2f", measuringt15)
+                        }
+                        if (measuringt16 < -50 || measuringt16 > 100 || !trmStatus16) {
+                            controller.tableValuesTest1[5].section1t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest1[5].section1t.value = String.format("%.2f", measuringt16)
+                        }
+                        if (measuringt21 < -50 || measuringt21 > 100 || !trmStatus21) {
+                            controller.tableValuesTest2[0].section21t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest2[0].section21t.value = String.format("%.2f", measuringt21)
+                        }
+                        if (measuringt22 < -50 || measuringt22 > 100 || !trmStatus22) {
+                            controller.tableValuesTest2[1].section21t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest2[1].section21t.value = String.format("%.2f", measuringt22)
+                        }
+                        if (measuringt23 < -50 || measuringt23 > 100 || !trmStatus23) {
+                            controller.tableValuesTest2[2].section21t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest2[2].section21t.value = String.format("%.2f", measuringt23)
+                        }
+                        if (measuringt24 < -50 || measuringt24 > 100 || !trmStatus24) {
+                            controller.tableValuesTest2[3].section21t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest2[3].section21t.value = String.format("%.2f", measuringt24)
+                        }
+                        if (measuringt25 < -50 || measuringt25 > 100 || !trmStatus25) {
+                            controller.tableValuesTest2[4].section21t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest2[4].section21t.value = String.format("%.2f", measuringt25)
+                        }
+                        if (measuringt26 < -50 || measuringt26 > 100 || !trmStatus26) {
+                            controller.tableValuesTest2[5].section21t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest2[5].section21t.value = String.format("%.2f", measuringt26)
+                        }
+                        if (measuringt31 < -50 || measuringt31 > 100 || !trmStatus31) {
+                            controller.tableValuesTest3[0].section31t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest3[0].section31t.value = String.format("%.2f", measuringt31)
+                        }
+                        if (measuringt32 < -50 || measuringt32 > 100 || !trmStatus32) {
+                            controller.tableValuesTest3[1].section31t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest3[1].section31t.value = String.format("%.2f", measuringt32)
+                        }
+                        if (measuringt33 < -50 || measuringt33 > 100 || !trmStatus33) {
+                            controller.tableValuesTest3[2].section31t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest3[2].section31t.value = String.format("%.2f", measuringt33)
+                        }
+                        if (measuringt34 < -50 || measuringt34 > 100 || !trmStatus34) {
+                            controller.tableValuesTest3[3].section31t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest3[3].section31t.value = String.format("%.2f", measuringt34)
+                        }
+                        if (measuringt35 < -50 || measuringt35 > 100 || !trmStatus35) {
+                            controller.tableValuesTest3[4].section31t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest3[4].section31t.value = String.format("%.2f", measuringt35)
+                        }
+                        if (measuringt36 < -50 || measuringt36 > 100 || !trmStatus36) {
+                            controller.tableValuesTest3[5].section31t.value = "-.--"
+                        } else {
+                            controller.tableValuesTest3[5].section31t.value = String.format("%.2f", measuringt36)
+                        }
+                        if (measuringt17 < -40 && measuringt17 > 400 || !trmStatus17) {
+                            controller.tableValuesWaterTemp[0].waterTemp.value = "-.--"
+                        } else {
+                            controller.tableValuesWaterTemp[0].waterTemp.value = String.format("%.2f", measuringt17)
+                        }
+                    }
+                    if (measuringt11 < -50 || measuringt11 > 100 || !trmStatus11) {
+                        listOfValues11.add("-99.9")
+                    } else {
+                        listOfValues11.add(String.format("%.1f", measuringt11))
+                    }
+                    if (measuringt12 < -50 || measuringt12 > 100 || !trmStatus12) {
+                        listOfValues12.add("-99.9")
+                    } else {
+                        listOfValues12.add(String.format("%.1f", measuringt12))
+                    }
+                    if (measuringt13 < -50 || measuringt13 > 100 || !trmStatus13) {
+                        listOfValues13.add("-99.9")
+                    } else {
+                        listOfValues13.add(String.format("%.1f", measuringt13))
+                    }
+                    if (measuringt14 < -50 || measuringt14 > 100 || !trmStatus14) {
+                        listOfValues14.add("-99.9")
+                    } else {
+                        listOfValues14.add(String.format("%.1f", measuringt14))
+                    }
+                    if (measuringt15 < -50 || measuringt15 > 100 || !trmStatus15) {
+                        listOfValues15.add("-99.9")
+                    } else {
+                        listOfValues15.add(String.format("%.1f", measuringt15))
+                    }
+                    if (measuringt16 < -50 || measuringt16 > 100 || !trmStatus16) {
+                        listOfValues16.add("-99.9")
+                    } else {
+                        listOfValues16.add(String.format("%.1f", measuringt16))
+                    }
+                    if (measuringt21 < -50 || measuringt21 > 100 || !trmStatus21) {
+                        listOfValues21.add("-99.9")
+                    } else {
+                        listOfValues21.add(String.format("%.1f", measuringt21))
+                    }
+                    if (measuringt22 < -50 || measuringt22 > 100 || !trmStatus22) {
+                        listOfValues22.add("-99.9")
+                    } else {
+                        listOfValues22.add(String.format("%.1f", measuringt22))
+                    }
+                    if (measuringt23 < -50 || measuringt23 > 100 || !trmStatus23) {
+                        listOfValues23.add("-99.9")
+                    } else {
+                        listOfValues23.add(String.format("%.1f", measuringt23))
+                    }
+                    if (measuringt24 < -50 || measuringt24 > 100 || !trmStatus24) {
+                        listOfValues24.add("-99.9")
+                    } else {
+                        listOfValues24.add(String.format("%.1f", measuringt24))
+                    }
+                    if (measuringt25 < -50 || measuringt25 > 100 || !trmStatus25) {
+                        listOfValues25.add("-99.9")
+                    } else {
+                        listOfValues25.add(String.format("%.1f", measuringt25))
+                    }
+                    if (measuringt26 < -50 || measuringt26 > 100 || !trmStatus26) {
+                        listOfValues26.add("-99.9")
+                    } else {
+                        listOfValues26.add(String.format("%.1f", measuringt26))
+                    }
+                    if (measuringt31 < -50 || measuringt31 > 100 || !trmStatus31) {
+                        listOfValues31.add("-99.9")
+                    } else {
+                        listOfValues31.add(String.format("%.1f", measuringt31))
+                    }
+                    if (measuringt32 < -50 || measuringt32 > 100 || !trmStatus32) {
+                        listOfValues32.add("-99.9")
+                    } else {
+                        listOfValues32.add(String.format("%.1f", measuringt32))
+                    }
+                    if (measuringt33 < -50 || measuringt33 > 100 || !trmStatus33) {
+                        listOfValues33.add("-99.9")
+                    } else {
+                        listOfValues33.add(String.format("%.1f", measuringt33))
+                    }
+                    if (measuringt34 < -50 || measuringt34 > 100 || !trmStatus34) {
+                        listOfValues34.add("-99.9")
+                    } else {
+                        listOfValues34.add(String.format("%.1f", measuringt34))
+                    }
+                    if (measuringt35 < -50 || measuringt35 > 100 || !trmStatus35) {
+                        listOfValues35.add("-99.9")
+                    } else {
+                        listOfValues35.add(String.format("%.1f", measuringt35))
+                    }
+                    if (measuringt36 < -50 || measuringt36 > 100 || !trmStatus36) {
+                        listOfValues36.add("-99.9")
+                    } else {
+                        listOfValues36.add(String.format("%.1f", measuringt36))
+                    }
+                    if (measuringt17 < -40 || measuringt17 > 400 || !trmStatus17) {
+                        listOfValues17.add("-99.9")
+                    } else {
+                        listOfValues17.add(String.format("%.1f", measuringt17))
+                    }
+                },
+                onFinishJob = {
+                })
+
+            var currentCycle = 0
+            while (controller.isExperimentRunning && controller.isDevicesResponding() && cycles-- > 0) {
+                appendOneMessageToLog(LogTag.MESSAGE, "Цикл ${++currentCycle}")
+
+                if (controller.tableValuesTestTime[0].start.value.toDouble() != 0.0) {
+
+                    val timeStart1 = (controller.tableValuesTestTime[0].start.value.toDouble() * 60).toInt()
+                    val callbackTimerStart1 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timeStart1,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: нагрев 1 cекции: " + toHHmmss((timeStart1 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on11()
+                    }
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on21()
+                    }
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on31()
+                    }
+
+                    while (controller.isExperimentRunning && callbackTimerStart1.isRunning && controller.isDevicesResponding()) {
+                        sleep(100)
+                    }
+
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[0].pause.value.toDouble() != 0.0) {
+                    val timePause1 = (controller.tableValuesTestTime[0].pause.value.toDouble() * 60).toInt()
+                    val callbackTimerPause1 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timePause1,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: пауза 1 cекции: " + toHHmmss((timePause1 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    while (controller.isExperimentRunning && callbackTimerPause1.isRunning) {
+                        sleep(100)
+                    }
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[1].start.value.toDouble() != 0.0) {
+                    val timeStart2 = (controller.tableValuesTestTime[1].start.value.toDouble() * 60).toInt()
+                    val callbackTimerStart2 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timeStart2,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: нагрев 2 cекции: " + toHHmmss((timeStart2 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on12()
+                    }
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on22()
+                    }
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on32()
+                    }
+
+                    while (controller.isExperimentRunning && callbackTimerStart2.isRunning && controller.isDevicesResponding()) {
+                        sleep(100)
+                    }
+
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[1].pause.value.toDouble() != 0.0) {
+                    val timePause2 = (controller.tableValuesTestTime[1].pause.value.toDouble() * 60).toInt()
+                    val callbackTimerPause2 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timePause2,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: пауза 2 cекции: " + toHHmmss((timePause2 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    while (controller.isExperimentRunning && callbackTimerPause2.isRunning) {
+                        sleep(100)
+                    }
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[2].start.value.toDouble() != 0.0) {
+                    val timeStart3 = (controller.tableValuesTestTime[2].start.value.toDouble() * 60).toInt()
+                    val callbackTimerStart3 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timeStart3,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: нагрев 3 cекции: " + toHHmmss((timeStart3 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on13()
+                    }
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on23()
+                    }
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on33()
+                    }
+
+                    while (controller.isExperimentRunning && callbackTimerStart3.isRunning && controller.isDevicesResponding()) {
+                        sleep(100)
+                    }
+
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[2].pause.value.toDouble() != 0.0) {
+                    val timePause3 = (controller.tableValuesTestTime[2].pause.value.toDouble() * 60).toInt()
+                    val callbackTimerPause3 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timePause3,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: пауза 3 cекции: " + toHHmmss((timePause3 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    while (controller.isExperimentRunning && callbackTimerPause3.isRunning) {
+                        sleep(100)
+                    }
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[3].start.value.toDouble() != 0.0) {
+                    val timeStart4 = (controller.tableValuesTestTime[3].start.value.toDouble() * 60).toInt()
+                    val callbackTimerStart4 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timeStart4,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: нагрев 4 cекции: " + toHHmmss((timeStart4 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on14()
+                    }
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on24()
+                    }
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on34()
+                    }
+
+                    while (controller.isExperimentRunning && callbackTimerStart4.isRunning && controller.isDevicesResponding()) {
+                        sleep(100)
+                    }
+
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[3].pause.value.toDouble() != 0.0) {
+                    val timePause4 = (controller.tableValuesTestTime[3].pause.value.toDouble() * 60).toInt()
+                    val callbackTimerPause4 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timePause4,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: пауза 4 cекции: " + toHHmmss((timePause4 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    while (controller.isExperimentRunning && callbackTimerPause4.isRunning) {
+                        sleep(100)
+                    }
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[4].start.value.toDouble() != 0.0) {
+                    val timeStart5 = (controller.tableValuesTestTime[4].start.value.toDouble() * 60).toInt()
+                    val callbackTimerStart5 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timeStart5,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: нагрев 5 cекции: " + toHHmmss((timeStart5 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on15()
+                    }
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on25()
+                    }
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on35()
+                    }
+
+                    while (controller.isExperimentRunning && callbackTimerStart5.isRunning && controller.isDevicesResponding()) {
+                        sleep(100)
+                    }
+
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[4].pause.value.toDouble() != 0.0) {
+                    val timePause5 = (controller.tableValuesTestTime[4].pause.value.toDouble() * 60).toInt()
+                    val callbackTimerPause5 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timePause5,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: пауза 5 cекции: " + toHHmmss((timePause5 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    while (controller.isExperimentRunning && callbackTimerPause5.isRunning) {
+                        sleep(100)
+                    }
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[5].start.value.toDouble() != 0.0) {
+                    val timeStart6 = (controller.tableValuesTestTime[5].start.value.toDouble() * 60).toInt()
+                    val callbackTimerStart6 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timeStart6,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: нагрев 6 cекции: " + toHHmmss((timeStart6 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on16()
+                    }
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on26()
+                    }
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                        owenPR.on36()
+                    }
+
+                    while (controller.isExperimentRunning && callbackTimerStart6.isRunning && controller.isDevicesResponding()) {
+                        sleep(100)
+                    }
+
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+
+                if (controller.tableValuesTestTime[5].pause.value.toDouble() != 0.0) {
+                    val timePause6 = (controller.tableValuesTestTime[5].pause.value.toDouble() * 60).toInt()
+                    val callbackTimerPause6 = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timePause6,
+                        tickJob = {
+                            if (!controller.isExperimentRunning) {
+                                it.stop()
+                            } else {
+                                runLater {
+                                    mainView.labelTestStatus.text =
+                                        "Статус: пауза 6 cекции: " + toHHmmss((timePause6 - it.getCurrentTicks()) * 1000L)
+                                }
+                            }
+                        },
+                        onFinishJob = {
+                        })
+
+                    while (controller.isExperimentRunning && callbackTimerPause6.isRunning) {
+                        sleep(100)
+                    }
+                    if (controller.isExperimentRunning) {
+                        owenPR.offAllKMs()
+                    }
+                }
+            }
+
+            if (listOfValues11.isNotEmpty()) {
+                saveProtocolToDB()
+            }
+
+            owenPR.offAllKMs()
+            appendMessageToLog(LogTag.MESSAGE, "Испытание завершено")
+            setResult()
+
+            finalizeExperiment()
+            runLater {
+                mainView.labelTestStatus.text = ""
+                mainView.tableViewTestTime.isDisable = false
+                mainView.textFieldTimeCycle.isDisable = false
+                mainView.buttonStart.isDisable = false
+                mainView.buttonStop.isDisable = true
+                mainView.mainMenubar.isDisable = false
+                mainView.checkBoxTest1.isDisable = false
+                mainView.checkBoxTest2.isDisable = false
+                mainView.checkBoxTest3.isDisable = false
             }
         }
     }
@@ -830,6 +1111,7 @@ class Test1Controller : TestController() {
                 temp14 = listOfValues14.toString()
                 temp15 = listOfValues15.toString()
                 temp16 = listOfValues16.toString()
+                temp17 = listOfValues17.toString()
                 temp21 = listOfValues21.toString()
                 temp22 = listOfValues22.toString()
                 temp23 = listOfValues23.toString()
@@ -846,45 +1128,40 @@ class Test1Controller : TestController() {
         }
     }
 
-    private fun getValuesInTable() {
+    private fun startValues() {
         thread(isDaemon = true) {
             while (controller.isExperimentRunning) {
-                runLater {
-                    controller.tableValuesTest21[0].voltage.value = formatRealNumber(measuringUA).toString()
-                    controller.tableValuesTest21[0].ampere.value = formatRealNumber(measuringIA).toString()
-                    controller.tableValuesTest22[0].voltage.value = formatRealNumber(measuringUB).toString()
-                    controller.tableValuesTest22[0].ampere.value = formatRealNumber(measuringIB).toString()
-                    controller.tableValuesTest23[0].voltage.value = formatRealNumber(measuringUC).toString()
-                    controller.tableValuesTest23[0].ampere.value = formatRealNumber(measuringIC).toString()
-                    controller.tableValuesTest1[0].section1t.value = formatRealNumber(measuringt11).toString()
-                    controller.tableValuesTest1[1].section1t.value = formatRealNumber(measuringt12).toString()
-                    controller.tableValuesTest1[2].section1t.value = formatRealNumber(measuringt13).toString()
-                    controller.tableValuesTest1[3].section1t.value = formatRealNumber(measuringt14).toString()
-                    controller.tableValuesTest1[4].section1t.value = formatRealNumber(measuringt15).toString()
-                    controller.tableValuesTest1[5].section1t.value = formatRealNumber(measuringt16).toString()
-                    controller.tableValuesTest2[0].section21t.value = formatRealNumber(measuringt21).toString()
-                    controller.tableValuesTest2[1].section21t.value = formatRealNumber(measuringt22).toString()
-                    controller.tableValuesTest2[2].section21t.value = formatRealNumber(measuringt23).toString()
-                    controller.tableValuesTest2[3].section21t.value = formatRealNumber(measuringt24).toString()
-                    controller.tableValuesTest2[4].section21t.value = formatRealNumber(measuringt25).toString()
-                    controller.tableValuesTest2[5].section21t.value = formatRealNumber(measuringt26).toString()
-                    controller.tableValuesTest3[0].section31t.value = formatRealNumber(measuringt31).toString()
-                    controller.tableValuesTest3[1].section31t.value = formatRealNumber(measuringt32).toString()
-                    controller.tableValuesTest3[2].section31t.value = formatRealNumber(measuringt33).toString()
-                    controller.tableValuesTest3[3].section31t.value = formatRealNumber(measuringt34).toString()
-                    controller.tableValuesTest3[4].section31t.value = formatRealNumber(measuringt35).toString()
-                    controller.tableValuesTest3[5].section31t.value = formatRealNumber(measuringt36).toString()
-                }
+                trmStatus11 = trm1.checkStatus(0) == 1
+                trmStatus12 = trm1.checkStatus(1) == 1
+                trmStatus13 = trm1.checkStatus(2) == 1
+                trmStatus14 = trm1.checkStatus(3) == 1
+                trmStatus15 = trm1.checkStatus(4) == 1
+                trmStatus16 = trm1.checkStatus(5) == 1
+                trmStatus17 = trm1.checkStatus(6) == 1
+
+                trmStatus21 = trm2.checkStatus(0) == 1
+                trmStatus22 = trm2.checkStatus(1) == 1
+                trmStatus23 = trm2.checkStatus(2) == 1
+                trmStatus24 = trm2.checkStatus(3) == 1
+                trmStatus25 = trm2.checkStatus(4) == 1
+                trmStatus26 = trm2.checkStatus(5) == 1
+
+                trmStatus31 = trm3.checkStatus(0) == 1
+                trmStatus32 = trm3.checkStatus(1) == 1
+                trmStatus33 = trm3.checkStatus(2) == 1
+                trmStatus34 = trm3.checkStatus(3) == 1
+                trmStatus35 = trm3.checkStatus(4) == 1
+                trmStatus36 = trm3.checkStatus(5) == 1
                 sleep(100)
             }
         }
     }
 
     private fun setResult() {
-        if (!controller.isDevicesResponding) {
-            appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: \nпотеряна связь с устройствами")
-        } else if (controller.cause.isNotEmpty()) {
+        if (controller.cause.isNotEmpty()) {
             appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: ${controller.cause}")
+        } else if (!controller.isDevicesResponding()) {
+            appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: потеряна связь с устройствами")
         } else {
             appendMessageToLog(LogTag.MESSAGE, "Испытание завершено успешно")
         }
@@ -892,6 +1169,7 @@ class Test1Controller : TestController() {
 
     private fun finalizeExperiment() {
         isExperimentEnded = true
+        controller.isExperimentRunning = false
 //        owenPR.offAllKMs()
         CommunicationModel.clearPollingRegisters()
 

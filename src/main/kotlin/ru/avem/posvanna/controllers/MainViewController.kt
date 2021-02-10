@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.text.Text
 import ru.avem.posvanna.app.Pos.Companion.isAppRunning
 import ru.avem.posvanna.communication.model.CommunicationModel
+import ru.avem.posvanna.communication.model.devices.owen.pr.OwenPrModel
 import ru.avem.posvanna.entities.*
 import ru.avem.posvanna.utils.LogTag
 import ru.avem.posvanna.utils.State
@@ -14,6 +15,7 @@ import ru.avem.posvanna.view.MainView
 import tornadofx.*
 import java.text.SimpleDateFormat
 import kotlin.concurrent.thread
+import kotlin.experimental.and
 import kotlin.time.ExperimentalTime
 
 
@@ -22,7 +24,7 @@ class MainViewController : Controller() {
     var position1 = ""
 
     @Volatile
-    var isExperimentRunning: Boolean = true
+    var isExperimentRunning: Boolean = false
 
     var cause: String = ""
         set(value) {
@@ -131,7 +133,6 @@ class MainViewController : Controller() {
         )
     )
 
-
     var tableValuesTestTime = observableList(
         TableValuesTestTime(
             SimpleStringProperty("1 секция"),
@@ -165,31 +166,67 @@ class MainViewController : Controller() {
         )
     )
 
+    var tableValuesWaterTemp = observableList(
+        TableValuesWaterTemp(
+            SimpleStringProperty("0.0")
+        )
+    )
+
     init {
         thread(isDaemon = true) {
             runLater {
                 view.buttonStop.isDisable = true
             }
             while (isAppRunning) {
+                var register = CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2)
+                    .getRegisterById(OwenPrModel.INSTANT_STATES_REGISTER_1)
+                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).readRegister(register)
+                var doorZone1 = register.value.toShort() and 2 > 0
+
                 if (CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding) {
                     runLater {
                         view.comIndicate.fill = State.OK.c
                     }
+                    if (doorZone1) {
+                        runLater {
+                            view.labelTestStatusEnd1.text = "Дверь открыта"
+                        }
+                    } else {
+                        runLater {
+                            view.labelTestStatusEnd1.text = ""
+                        }
+                    }
+                    if (!isExperimentRunning && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding && !doorZone1) {
+                        runLater {
+                            view.buttonStart.isDisable = false
+                        }
+                    } else if (!isExperimentRunning && (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding || doorZone1)) {
+                        runLater {
+                            view.buttonStart.isDisable = true
+                        }
+
+                    }
                 } else {
                     runLater {
+                        cause = "Нет связи"
                         view.comIndicate.fill = State.BAD.c
+                        view.labelTestStatusEnd1.text = "Нет связи со стендом. Проверьте подключение."
+                        view.buttonStart.isDisable = true
+                        view.buttonStop.isDisable = true
                     }
                 }
-                sleep(1000)
             }
         }
+        sleep(1000)
     }
 
-    var isDevicesResponding = CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding
-            && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.PARMA1).isResponding
-            && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM1).isResponding
-            && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM2).isResponding
-            && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM3).isResponding
+
+    fun isDevicesResponding(): Boolean {
+        return CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding &&
+                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM1).isResponding &&
+                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM2).isResponding &&
+                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM3).isResponding
+    }
 
     @UseExperimental(ExperimentalTime::class)
     fun handleStartTest() {
@@ -202,34 +239,7 @@ class MainViewController : Controller() {
                 Toast.makeText("Выберите хотя бы один объект испытания").show(Toast.ToastType.ERROR)
             }
         } else {
-            thread(isDaemon = true) {
-                runLater {
-                    view.buttonStart.isDisable = true
-                    view.buttonStop.isDisable = false
-                    view.mainMenubar.isDisable = true
-                    view.checkBoxTest1.isDisable = true
-                    view.checkBoxTest2.isDisable = true
-                    view.checkBoxTest3.isDisable = true
-                }
-
-                isExperimentRunning = true
-
-                appendMessageToLog(LogTag.DEBUG, "Начало испытания")
-
-                Test1Controller().startTest()
-
-                appendMessageToLog(LogTag.MESSAGE, "Испытание завершено")
-
-                isExperimentRunning = false
-                runLater {
-                    view.buttonStart.isDisable = false
-                    view.buttonStop.isDisable = true
-                    view.mainMenubar.isDisable = false
-                    view.checkBoxTest1.isDisable = false
-                    view.checkBoxTest2.isDisable = false
-                    view.checkBoxTest3.isDisable = false
-                }
-            }
+            Test1Controller().startTest()
         }
     }
 
@@ -259,7 +269,7 @@ class MainViewController : Controller() {
     }
 
     fun showAboutUs() {
-        Toast.makeText("Версия ПО: 1.0.0\nВерсия БСУ: 1.0.0\nДата: 30.04.2020").show(Toast.ToastType.INFORMATION)
+        Toast.makeText("Версия ПО: 1.0.0\nВерсия БСУ: 1.0.0\nДата: 09.02.2021").show(Toast.ToastType.INFORMATION)
     }
 
 

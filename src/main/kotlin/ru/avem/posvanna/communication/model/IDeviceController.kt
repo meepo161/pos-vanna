@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import ru.avem.kserialpooler.communication.adapters.modbusrtu.ModbusRTUAdapter
 import ru.avem.posvanna.communication.utils.TransportException
 import ru.avem.posvanna.utils.sleep
+import java.lang.Exception
 
 interface IDeviceController {
     val name: String
@@ -56,18 +57,17 @@ interface IDeviceController {
             try {
                 block()
                 requestSuccessCount++
-                isResponding = true
                 break
-            } catch (e: TransportException) {
-                isResponding = false
+            } catch (e: ru.avem.kserialpooler.communication.utils.TransportException) {
                 val message =
                     "repeat $attempt/${connection.attemptCount} attempts with common success rate = ${(requestSuccessCount) * 100 / requestTotalCount}%"
                 KotlinLogging.logger(name).info(message)
 
                 if (attempt == connection.attemptCount) {
-                    throw TransportException(message)
+                    throw ru.avem.kserialpooler.communication.utils.TransportException(message)
                 }
             }
+            sleep(10)
         }
     }
 
@@ -98,16 +98,19 @@ interface IDeviceController {
         }
     }
 
+    fun removeAllWritingRegisters() {
+        synchronized(writingMutex) {
+            writingRegisters.forEach {
+                it.first.deleteObservers()
+            }
+            writingRegisters.clear()
+        }
+    }
+
     fun readPollingRegisters() {
         synchronized(pollingMutex) {
             pollingRegisters.forEach {
-                isResponding = try {
-                    readRegister(it)
-                    sleep(50)
-                    true
-                } catch (e: TransportException) {
-                    false
-                }
+                readRegister(it)
             }
         }
     }
@@ -115,12 +118,7 @@ interface IDeviceController {
     fun writeWritingRegisters() {
         synchronized(writingMutex) {
             writingRegisters.forEach {
-                isResponding = try {
-                    writeRegister(it.first, it.second)
-                    true
-                } catch (e: TransportException) {
-                    false
-                }
+                writeRegister(it.first, it.second)
             }
         }
     }

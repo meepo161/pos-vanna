@@ -37,7 +37,7 @@ class ParmaController(
                 }
             }
             true
-        } catch (e: TransportException) {
+        } catch (e: Exception) {
             false
         }
     }
@@ -59,7 +59,7 @@ class ParmaController(
                 protocolAdapter.presetMultipleRegisters(id, register.address, registers)
             }
             true
-        } catch (e: TransportException) {
+        } catch (e: Exception) {
             false
         }
     }

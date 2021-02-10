@@ -14,6 +14,7 @@ object ProtocolsTable : IntIdTable() {
     val temp14 =  varchar("temp14", 99999999)
     val temp15 =  varchar("temp15", 99999999)
     val temp16 =  varchar("temp16", 99999999)
+    val temp17 =  varchar("temp16", 99999999)
     val temp21 =  varchar("temp21", 99999999)
     val temp22 =  varchar("temp22", 99999999)
     val temp23 =  varchar("temp23", 99999999)
@@ -38,6 +39,7 @@ class Protocol(id: EntityID<Int>) : IntEntity(id) {
     var temp14 by ProtocolsTable.temp14
     var temp15 by ProtocolsTable.temp15
     var temp16 by ProtocolsTable.temp16
+    var temp17 by ProtocolsTable.temp17
     var temp21 by ProtocolsTable.temp21
     var temp22 by ProtocolsTable.temp22
     var temp23 by ProtocolsTable.temp23

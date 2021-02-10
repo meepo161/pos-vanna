@@ -4,9 +4,9 @@ import ru.avem.kserialpooler.communication.adapters.modbusrtu.ModbusRTUAdapter
 import ru.avem.kserialpooler.communication.adapters.utils.ModbusRegister
 import ru.avem.posvanna.communication.model.DeviceRegister
 import ru.avem.posvanna.communication.model.IDeviceController
-import ru.avem.posvanna.communication.utils.TransportException
 import ru.avem.posvanna.communication.utils.TypeByteOrder
 import ru.avem.posvanna.communication.utils.allocateOrderedByteBuffer
+import ru.avem.posvanna.communication.utils.toInt
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -35,18 +35,18 @@ class Trm136Controller(
                     }
                     DeviceRegister.RegisterValueType.FLOAT -> {
                         val modbusRegister =
-                                protocolAdapter.readInputRegisters(id, register.address, 2).map(ModbusRegister::toShort)
+                            protocolAdapter.readInputRegisters(id, register.address, 2).map(ModbusRegister::toShort)
                         register.value = allocateOrderedByteBuffer(modbusRegister, TypeByteOrder.BIG_ENDIAN, 4).float
                     }
                     DeviceRegister.RegisterValueType.INT32 -> {
                         val modbusRegister =
-                                protocolAdapter.readInputRegisters(id, register.address, 2).map(ModbusRegister::toShort)
+                            protocolAdapter.readInputRegisters(id, register.address, 2).map(ModbusRegister::toShort)
                         register.value = allocateOrderedByteBuffer(modbusRegister, TypeByteOrder.BIG_ENDIAN, 4).int
                     }
                 }
             }
             true
-        } catch (e: TransportException) {
+        } catch (e: ru.avem.kserialpooler.communication.utils.TransportException) {
             false
         }
     }
@@ -98,7 +98,15 @@ class Trm136Controller(
             model.registers.values.firstOrNull()?.let {
                 readRegister(it)
             }
-        } catch (ignored: TransportException) {
+        } catch (e: ru.avem.kserialpooler.communication.utils.TransportException) {
+        }
+    }
+
+    fun checkStatus(register: Short): Int {
+        return try {
+            protocolAdapter.readCoilStatus(id, register, 1).getBit(0).toInt()
+        } catch (e: ru.avem.kserialpooler.communication.utils.TransportException) {
+            1
         }
     }
 }

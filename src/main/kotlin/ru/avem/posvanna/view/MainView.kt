@@ -31,9 +31,13 @@ class MainView : View("Комплексный стенд для испытани
     val checkBoxIntBind = SimpleIntegerProperty() //TODO переименовать нормально
 
     var textFieldTimeCycle: TextField by singleAssign()
+    var tableViewTestTime: TableView<TableValuesTestTime> by singleAssign()
 
     var labelTimeRemaining: Label by singleAssign()
     var labelTestStatus: Label by singleAssign()
+    var labelTestStatusEnd1: Label by singleAssign()
+    var labelTestStatusEnd2: Label by singleAssign()
+    var labelTestStatusEnd3: Label by singleAssign()
 
     var buttonStart: Button by singleAssign()
     var buttonStop: Button by singleAssign()
@@ -103,7 +107,7 @@ class MainView : View("Комплексный стенд для испытани
                                     alignment = Pos.CENTER
                                 }.addClass(extraHard)
                             }
-                            tableview(controller.tableValuesTestTime) {
+                            tableViewTestTime = tableview(controller.tableValuesTestTime) {
 
                                 minHeight = 346.0
                                 maxHeight = 346.0
@@ -192,35 +196,44 @@ class MainView : View("Комплексный стенд для испытани
                             bottomAnchor = 16.0
                         }
                         alignmentProperty().set(Pos.CENTER)
+                        tableview(controller.tableValuesWaterTemp) {
+                            minHeight = 96.0
+                            maxHeight = 96.0
+                            minWidth = 150.0
+                            prefWidth = 150.0
+                            columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
+                            mouseTransparentProperty().set(true)
+                            column("t воды, °C", TableValuesWaterTemp::waterTemp.getter)
+                        }
                         tableview(controller.tableValuesTest21) {
                             minHeight = 96.0
                             maxHeight = 96.0
-                            minWidth = 500.0
-                            prefWidth = 500.0
+                            minWidth = 400.0
+                            prefWidth = 400.0
                             columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
                             mouseTransparentProperty().set(true)
-                            column("U, В", TableValuesTest21::voltage.getter)
-                            column("I, А", TableValuesTest21::ampere.getter)
+                            column("UA, В", TableValuesTest21::voltage.getter)
+                            column("IA, А", TableValuesTest21::ampere.getter)
                         }
                         tableview(controller.tableValuesTest22) {
                             minHeight = 96.0
                             maxHeight = 96.0
-                            minWidth = 500.0
-                            prefWidth = 500.0
+                            minWidth = 400.0
+                            prefWidth = 400.0
                             columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
                             mouseTransparentProperty().set(true)
-                            column("U, В", TableValuesTest22::voltage.getter)
-                            column("I, А", TableValuesTest22::ampere.getter)
+                            column("UB, В", TableValuesTest22::voltage.getter)
+                            column("IB, А", TableValuesTest22::ampere.getter)
                         }
                         tableview(controller.tableValuesTest23) {
                             minHeight = 96.0
                             maxHeight = 96.0
-                            minWidth = 500.0
-                            prefWidth = 500.0
+                            minWidth = 400.0
+                            prefWidth = 400.0
                             columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
                             mouseTransparentProperty().set(true)
-                            column("U, В", TableValuesTest23::voltage.getter)
-                            column("I, А", TableValuesTest23::ampere.getter)
+                            column("UC, В", TableValuesTest23::voltage.getter)
+                            column("IC, А", TableValuesTest23::ampere.getter)
                         }
                     }
                     hbox {
@@ -249,6 +262,9 @@ class MainView : View("Комплексный стенд для испытани
 
                     hbox(spacing = 16) {
                         alignment = Pos.CENTER
+                        labelTestStatusEnd1 = label("")
+                        labelTestStatusEnd2 = label("")
+                        labelTestStatusEnd3 = label("")
                         labelTestStatus = label("")
                         labelTimeRemaining = label("")
                     }.addClass(extraHard)
@@ -284,7 +300,7 @@ class MainView : View("Комплексный стенд для испытани
                 stroke = c("black")
                 isSmooth = true
             }
-            label(" Связь со стендом") {
+            label(" Связь со ПР") {
                 hboxConstraints {
                     hGrow = Priority.ALWAYS
                     marginBottom = 8.0

@@ -37,3 +37,7 @@ data class TableValuesTestTime(
         var start: StringProperty,
         var pause: StringProperty
 )
+
+data class TableValuesWaterTemp(
+        var waterTemp: StringProperty
+)

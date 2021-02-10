@@ -38,10 +38,15 @@ class OwenPrController(
     }
 
     override fun readRegister(register: DeviceRegister) {
-        transactionWithAttempts {
-            val modbusRegister =
-                protocolAdapter.readHoldingRegisters(id, register.address, 2).map(ModbusRegister::toShort)
-            register.value = allocateOrderedByteBuffer(modbusRegister, TypeByteOrder.LITTLE_ENDIAN, 4).float.toDouble()
+        isResponding = try {
+            transactionWithAttempts {
+                val modbusRegister =
+                    protocolAdapter.readHoldingRegisters(id, register.address, 1).map(ModbusRegister::toShort)
+                register.value = modbusRegister.first()
+            }
+            true
+        } catch (e: ru.avem.kserialpooler.communication.utils.TransportException) {
+            false
         }
     }
 
@@ -52,45 +57,52 @@ class OwenPrController(
     }
 
     override fun <T : Number> writeRegister(register: DeviceRegister, value: T) {
-        when (value) {
-            is Float -> {
-                val bb = ByteBuffer.allocate(4).putFloat(value).order(ByteOrder.LITTLE_ENDIAN)
-                val registers = listOf(ModbusRegister(bb.getShort(2)), ModbusRegister(bb.getShort(0)))
-                transactionWithAttempts {
-                    protocolAdapter.presetMultipleRegisters(id, register.address, registers)
+        isResponding = try {
+            when (value) {
+                is Float -> {
+                    val bb = ByteBuffer.allocate(4).putFloat(value).order(ByteOrder.LITTLE_ENDIAN)
+                    val registers = listOf(ModbusRegister(bb.getShort(2)), ModbusRegister(bb.getShort(0)))
+                    transactionWithAttempts {
+                        protocolAdapter.presetMultipleRegisters(id, register.address, registers)
+                    }
+                }
+                is Int -> {
+                    val bb = ByteBuffer.allocate(4).putInt(value).order(ByteOrder.LITTLE_ENDIAN)
+                    val registers = listOf(ModbusRegister(bb.getShort(2)), ModbusRegister(bb.getShort(0)))
+                    transactionWithAttempts {
+                        protocolAdapter.presetMultipleRegisters(id, register.address, registers)
+                    }
+                }
+                is Short -> {
+                    transactionWithAttempts {
+                        protocolAdapter.presetSingleRegister(id, register.address, ModbusRegister(value))
+                    }
+                }
+                else -> {
+                    throw UnsupportedOperationException("Method can handle only with Float, Int and Short")
                 }
             }
-            is Int -> {
-                val bb = ByteBuffer.allocate(4).putInt(value).order(ByteOrder.LITTLE_ENDIAN)
-                val registers = listOf(ModbusRegister(bb.getShort(2)), ModbusRegister(bb.getShort(0)))
-                transactionWithAttempts {
-                    protocolAdapter.presetMultipleRegisters(id, register.address, registers)
-                }
-            }
-            is Short -> {
-                transactionWithAttempts {
-                    protocolAdapter.presetSingleRegister(id, register.address, ModbusRegister(value))
-                }
-            }
-            else -> {
-                throw UnsupportedOperationException("Method can handle only with Float, Int and Short")
-            }
+            true
+        } catch (e: ru.avem.kserialpooler.communication.utils.TransportException) {
+            false
         }
     }
 
     override fun writeRegisters(register: DeviceRegister, values: List<Short>) {
         val registers = values.map { ModbusRegister(it) }
-        transactionWithAttempts {
-            protocolAdapter.presetMultipleRegisters(id, register.address, registers)
+        isResponding = try {
+            transactionWithAttempts {
+                protocolAdapter.presetMultipleRegisters(id, register.address, registers)
+            }
+            true
+        } catch (e: ru.avem.kserialpooler.communication.utils.TransportException) {
+            false
         }
     }
 
     override fun checkResponsibility() {
-        try {
-            model.registers.values.firstOrNull()?.let {
-                readRegister(it)
-            }
-        } catch (ignored: TransportException) {
+        model.registers.values.firstOrNull()?.let {
+            readRegister(it)
         }
     }
 

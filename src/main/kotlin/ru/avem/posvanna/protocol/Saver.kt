@@ -57,6 +57,7 @@ fun saveProtocolAsWorkbook(protocol: Protocol, path: String = "protocol.xlsx") {
                 protocol.temp14,
                 protocol.temp15,
                 protocol.temp16,
+                protocol.temp17,
                 protocol.temp21,
                 protocol.temp22,
                 protocol.temp23,
@@ -184,6 +185,7 @@ fun fillParameters18(
     dots14: String,
     dots15: String,
     dots16: String,
+    dots17: String,
     dots21: String,
     dots22: String,
     dots23: String,
@@ -209,6 +211,8 @@ fun fillParameters18(
     val values15 = dots15.removePrefix("[").removePrefix("'").removeSuffix("]")
         .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
     val values16 = dots16.removePrefix("[").removePrefix("'").removeSuffix("]")
+        .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+    val values17 = dots17.removePrefix("[").removePrefix("'").removeSuffix("]")
         .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
     val values21 = dots21.removePrefix("[").removePrefix("'").removeSuffix("]")
         .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
@@ -241,6 +245,7 @@ fun fillParameters18(
     val valuesForExcel14 = arrayListOf<Double>()
     val valuesForExcel15 = arrayListOf<Double>()
     val valuesForExcel16 = arrayListOf<Double>()
+    val valuesForExcel17 = arrayListOf<Double>()
     val valuesForExcel21 = arrayListOf<Double>()
     val valuesForExcel22 = arrayListOf<Double>()
     val valuesForExcel23 = arrayListOf<Double>()
@@ -264,6 +269,7 @@ fun fillParameters18(
         valuesForExcel14.add(values14[i])
         valuesForExcel15.add(values15[i])
         valuesForExcel16.add(values16[i])
+        valuesForExcel17.add(values17[i])
         valuesForExcel21.add(values21[i])
         valuesForExcel22.add(values22[i])
         valuesForExcel23.add(values23[i])
@@ -319,6 +325,8 @@ fun fillParameters18(
         fillOneCell(row, columnNumber + 33, cellStyle, valuesForExcel35[i])
         fillOneCell(row, columnNumber + 34, cellStyle, i)
         fillOneCell(row, columnNumber + 35, cellStyle, valuesForExcel36[i])
+        fillOneCell(row, columnNumber + 36, cellStyle, i)
+        fillOneCell(row, columnNumber + 37, cellStyle, valuesForExcel17[i])
         row = sheet.createRow(++rowNum)
     }
 
@@ -408,6 +416,9 @@ private fun drawLineChart18(workbook: XSSFWorkbook) {
     val timeData36 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 34, 34))
     val valueData36 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 35, 35))
 
+    val timeData17 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 36, 36))
+    val valueData17 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 37, 37))
+
     val lineChart11 = createLineChart(sheet, 16, 26)
     drawLineChart18(lineChart11, timeData11, valueData11)
     val lineChart12 = createLineChart(sheet, 27, 37)
@@ -444,11 +455,13 @@ private fun drawLineChart18(workbook: XSSFWorkbook) {
     drawLineChart18(lineChart35, timeData35, valueData35)
     val lineChart36 = createLineChart(sheet, 203, 213)
     drawLineChart18(lineChart36, timeData36, valueData36)
+    val lineChart17 = createLineChart(sheet, 214, 224)
+    drawLineChart18(lineChart17, timeData17, valueData17)
 }
 
 private fun createLineChart(sheet: XSSFSheet, rowStart: Int, rowEnd: Int): XSSFChart {
     val drawing = sheet.createDrawingPatriarch()
-    val anchor = drawing.createAnchor(0, 0, 0, 0, 36, rowStart, 46, rowEnd)
+    val anchor = drawing.createAnchor(0, 0, 0, 0, 38, rowStart, 48, rowEnd)
 
     return drawing.createChart(anchor)
 }
