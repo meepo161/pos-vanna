@@ -22,7 +22,9 @@ class CallbackTimer(
     private val timerTask = object : TimerTask() {
         override fun run() {
             currentTick++
-            tickJob(this@CallbackTimer)
+            thread(isDaemon = true) {
+                tickJob(this@CallbackTimer)
+            }
 
             if (currentTick == tickTimes) {
                 isRunning = false

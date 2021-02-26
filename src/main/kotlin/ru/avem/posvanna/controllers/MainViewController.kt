@@ -239,7 +239,11 @@ class MainViewController : Controller() {
                 Toast.makeText("Выберите хотя бы один объект испытания").show(Toast.ToastType.ERROR)
             }
         } else {
-            Test1Controller().startTest()
+            if (view.textFieldMaxTemp.text.replace(",", ".").isDouble()) {
+                Test1Controller().startTest()
+            } else {
+                Toast.makeText("Неверное значение максимальной температуры").show(Toast.ToastType.ERROR)
+            }
         }
     }
 

@@ -184,6 +184,8 @@ class Test1Controller : TestController() {
 
     private var cycles: Int = 0
 
+    private var maxTemp: Double = 0.0
+
     //region листы для БД
     private var listOfValues11 = mutableListOf<String>()
     private var listOfValues12 = mutableListOf<String>()
@@ -235,7 +237,6 @@ class Test1Controller : TestController() {
     private fun startPollDevices() {
         //region pr pool
         CommunicationModel.startPoll(CommunicationModel.DeviceID.DD2, OwenPrModel.FIXED_STATES_REGISTER_1) { value ->
-            doorZone1 = value.toShort() and 2 > 0
             stopButton = value.toShort() and 32 > 0
             startButton = value.toShort() and 64 > 0
             if (doorZone1) {
@@ -243,6 +244,12 @@ class Test1Controller : TestController() {
             }
             if (stopButton) {
                 controller.cause = "Нажата кнопка Стоп"
+            }
+        }
+        CommunicationModel.startPoll(CommunicationModel.DeviceID.DD2, OwenPrModel.INSTANT_STATES_REGISTER_1) { value ->
+            doorZone1 = value.toShort() and 2 > 0
+            if (doorZone1) {
+                controller.cause = "Открыта дверь зоны"
             }
         }
         //endregion
@@ -277,118 +284,61 @@ class Test1Controller : TestController() {
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_1) { value ->
             measuringt11 = value.toDouble()
         }
-        if (measuringt11 > 45) {
-            controller.cause = "Температура 1 лопасти 1 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_2) { value ->
             measuringt12 = value.toDouble()
-        }
-        if (measuringt12 > 45) {
-            controller.cause = "Температура 1 лопасти 2 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_3) { value ->
             measuringt13 = value.toDouble()
         }
-        if (measuringt13 > 45) {
-            controller.cause = "Температура 1 лопасти 3 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_4) { value ->
             measuringt14 = value.toDouble()
-        }
-        if (measuringt14 > 45) {
-            controller.cause = "Температура 1 лопасти 4 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_5) { value ->
             measuringt15 = value.toDouble()
         }
-        if (measuringt15 > 45) {
-            controller.cause = "Температура 1 лопасти 5 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_6) { value ->
             measuringt16 = value.toDouble()
         }
-        if (measuringt16 > 45) {
-            controller.cause = "Температура 1 лопасти 6 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM1, Trm136Model.TEMPERATURE_7) { value ->
             measuringt17 = value.toDouble()
-        }
-        if (measuringt17 > 45) {
-            controller.cause = "Температура воды больше 45°С"
         }
 
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_1) { value ->
             measuringt21 = value.toDouble()
         }
-        if (measuringt21 > 45) {
-            controller.cause = "Температура 2 лопасти 1 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_2) { value ->
             measuringt22 = value.toDouble()
-        }
-        if (measuringt22 > 45) {
-            controller.cause = "Температура 2 лопасти 2 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_3) { value ->
             measuringt23 = value.toDouble()
         }
-        if (measuringt23 > 45) {
-            controller.cause = "Температура 2 лопасти 3 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_4) { value ->
             measuringt24 = value.toDouble()
-        }
-        if (measuringt24 > 45) {
-            controller.cause = "Температура 2 лопасти 4 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_5) { value ->
             measuringt25 = value.toDouble()
         }
-        if (measuringt25 > 45) {
-            controller.cause = "Температура 2 лопасти 5 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM2, Trm136Model.TEMPERATURE_6) { value ->
             measuringt26 = value.toDouble()
-        }
-        if (measuringt26 > 45) {
-            controller.cause = "Температура 2 лопасти 6 секции больше 45°С"
         }
 
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_1) { value ->
             measuringt31 = value.toDouble()
         }
-        if (measuringt31 > 45) {
-            controller.cause = "Температура 3 лопасти 1 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_2) { value ->
             measuringt32 = value.toDouble()
-        }
-        if (measuringt32 > 45) {
-            controller.cause = "Температура 3 лопасти 2 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_3) { value ->
             measuringt33 = value.toDouble()
         }
-        if (measuringt33 > 45) {
-            controller.cause = "Температура 3 лопасти 3 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_4) { value ->
             measuringt34 = value.toDouble()
-        }
-        if (measuringt34 > 45) {
-            controller.cause = "Температура 3 лопасти 4 секции больше 45°С"
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_5) { value ->
             measuringt35 = value.toDouble()
         }
-        if (measuringt35 > 45) {
-            controller.cause = "Температура 3 лопасти 5 секции больше 45°С"
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.TRM3, Trm136Model.TEMPERATURE_6) { value ->
             measuringt36 = value.toDouble()
-        }
-        if (measuringt36 > 45) {
-            controller.cause = "Температура 3 лопасти 6 секции больше 45°С"
         }
         //endregion
     }
@@ -417,7 +367,9 @@ class Test1Controller : TestController() {
                 mainView.checkBoxTest1.isDisable = true
                 mainView.checkBoxTest2.isDisable = true
                 mainView.checkBoxTest3.isDisable = true
+                mainView.textFieldMaxTemp.isDisable = true
             }
+            maxTemp = mainView.textFieldMaxTemp.text.replace(",", ".").toDouble()
 
             if (controller.isExperimentRunning) {
                 startPollDevices()
@@ -425,7 +377,7 @@ class Test1Controller : TestController() {
                 sleep(1000)
             }
 
-            var timeToPrepare = 100
+            var timeToPrepare = 300
             while (!controller.isDevicesResponding() && controller.isExperimentRunning && timeToPrepare-- > 0) {
                 sleep(100)
             }
@@ -486,13 +438,19 @@ class Test1Controller : TestController() {
             cycles = mainView.textFieldTimeCycle.text.toInt()
 
             val allTime =
-                (((controller.tableValuesTestTime[0].start.value.toDouble() * 60) + (controller.tableValuesTestTime[0].pause.value.toDouble() * 60) +
-                        (controller.tableValuesTestTime[1].start.value.toDouble() * 60) + (controller.tableValuesTestTime[1].pause.value.toDouble() * 60) +
-                        (controller.tableValuesTestTime[2].start.value.toDouble() * 60) + (controller.tableValuesTestTime[2].pause.value.toDouble() * 60) +
-                        (controller.tableValuesTestTime[3].start.value.toDouble() * 60) + (controller.tableValuesTestTime[3].pause.value.toDouble() * 60) +
-                        (controller.tableValuesTestTime[4].start.value.toDouble() * 60) + (controller.tableValuesTestTime[4].pause.value.toDouble() * 60) +
-                        (controller.tableValuesTestTime[5].start.value.toDouble() * 60) + (controller.tableValuesTestTime[5].pause.value.toDouble() * 60))
-                        * mainView.textFieldTimeCycle.text.toDouble()).toInt()
+                (((controller.tableValuesTestTime[0].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[0].pause.value.replace(",", ".").toDouble()) +
+                        (controller.tableValuesTestTime[1].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[1].pause.value.replace(",", ".").toDouble()) +
+                        (controller.tableValuesTestTime[2].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[2].pause.value.replace(",", ".").toDouble()) +
+                        (controller.tableValuesTestTime[3].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[3].pause.value.replace(",", ".").toDouble()) +
+                        (controller.tableValuesTestTime[4].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[4].pause.value.replace(",", ".").toDouble()) +
+                        (controller.tableValuesTestTime[5].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[5].pause.value.replace(",", ".").toDouble()))
+                        * mainView.textFieldTimeCycle.text.replace(",", ".").toDouble()).toInt()
             CallbackTimer(
                 tickPeriod = 1.seconds, tickTimes = allTime,
                 tickJob = {
@@ -602,6 +560,68 @@ class Test1Controller : TestController() {
                             controller.tableValuesWaterTemp[0].waterTemp.value = String.format("%.2f", measuringt17)
                         }
                     }
+
+                    if (measuringt11 > maxTemp) {
+                        controller.cause = "Температура 1 лопасти 1 секции больше $maxTemp°С"
+                    }
+                    if (measuringt12 > maxTemp) {
+                        controller.cause = "Температура 1 лопасти 2 секции больше $maxTemp°С"
+                    }
+                    if (measuringt13 > maxTemp) {
+                        controller.cause = "Температура 1 лопасти 3 секции больше $maxTemp°С"
+                    }
+                    if (measuringt14 > maxTemp) {
+                        controller.cause = "Температура 1 лопасти 4 секции больше $maxTemp°С"
+                    }
+                    if (measuringt15 > maxTemp) {
+                        controller.cause = "Температура 1 лопасти 5 секции больше $maxTemp°С"
+                    }
+                    if (measuringt16 > maxTemp) {
+                        controller.cause = "Температура 1 лопасти 6 секции больше $maxTemp°С"
+                    }
+
+                    if (measuringt17 > maxTemp) {
+                        controller.cause = "Температура воды больше $maxTemp°С"
+                    }
+
+                    if (measuringt21 > maxTemp) {
+                        controller.cause = "Температура 2 лопасти 1 секции больше $maxTemp°С"
+                    }
+                    if (measuringt22 > maxTemp) {
+                        controller.cause = "Температура 2 лопасти 2 секции больше $maxTemp°С"
+                    }
+                    if (measuringt23 > maxTemp) {
+                        controller.cause = "Температура 2 лопасти 3 секции больше $maxTemp°С"
+                    }
+                    if (measuringt24 > maxTemp) {
+                        controller.cause = "Температура 2 лопасти 4 секции больше $maxTemp°С"
+                    }
+                    if (measuringt25 > maxTemp) {
+                        controller.cause = "Температура 2 лопасти 5 секции больше $maxTemp°С"
+                    }
+                    if (measuringt26 > maxTemp) {
+                        controller.cause = "Температура 2 лопасти 6 секции больше $maxTemp°С"
+                    }
+
+                    if (measuringt31 > maxTemp) {
+                        controller.cause = "Температура 3 лопасти 1 секции больше $maxTemp°С"
+                    }
+                    if (measuringt32 > maxTemp) {
+                        controller.cause = "Температура 3 лопасти 2 секции больше $maxTemp°С"
+                    }
+                    if (measuringt33 > maxTemp) {
+                        controller.cause = "Температура 3 лопасти 3 секции больше $maxTemp°С"
+                    }
+                    if (measuringt34 > maxTemp) {
+                        controller.cause = "Температура 3 лопасти 4 секции больше $maxTemp°С"
+                    }
+                    if (measuringt35 > maxTemp) {
+                        controller.cause = "Температура 3 лопасти 5 секции больше $maxTemp°С"
+                    }
+                    if (measuringt36 > maxTemp) {
+                        controller.cause = "Температура 3 лопасти 6 секции больше $maxTemp°С"
+                    }
+
                     if (measuringt11 < -50 || measuringt11 > 100 || !trmStatus11) {
                         listOfValues11.add("-99.9")
                     } else {
@@ -705,9 +725,10 @@ class Test1Controller : TestController() {
             while (controller.isExperimentRunning && controller.isDevicesResponding() && cycles-- > 0) {
                 appendOneMessageToLog(LogTag.MESSAGE, "Цикл ${++currentCycle}")
 
-                if (controller.tableValuesTestTime[0].start.value.toDouble() != 0.0) {
+                if (controller.tableValuesTestTime[0].start.value.replace(",", ".").toDouble() != 0.0) {
 
-                    val timeStart1 = (controller.tableValuesTestTime[0].start.value.toDouble() * 60).toInt()
+                    val timeStart1 =
+                        (controller.tableValuesTestTime[0].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart1 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timeStart1,
                         tickJob = {
@@ -715,8 +736,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: нагрев 1 cекции: " + toHHmmss((timeStart1 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: нагрев 1 cекции"
                                 }
                             }
                         },
@@ -742,8 +762,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[0].pause.value.toDouble() != 0.0) {
-                    val timePause1 = (controller.tableValuesTestTime[0].pause.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[0].pause.value.replace(",", ".").toDouble() != 0.0) {
+                    val timePause1 =
+                        (controller.tableValuesTestTime[0].pause.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerPause1 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timePause1,
                         tickJob = {
@@ -751,8 +772,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: пауза 1 cекции: " + toHHmmss((timePause1 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: пауза 1 cекции"
                                 }
                             }
                         },
@@ -767,8 +787,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[1].start.value.toDouble() != 0.0) {
-                    val timeStart2 = (controller.tableValuesTestTime[1].start.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[1].start.value.replace(",", ".").toDouble() != 0.0) {
+                    val timeStart2 =
+                        (controller.tableValuesTestTime[1].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart2 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timeStart2,
                         tickJob = {
@@ -776,8 +797,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: нагрев 2 cекции: " + toHHmmss((timeStart2 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: нагрев 2 cекции"
                                 }
                             }
                         },
@@ -803,8 +823,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[1].pause.value.toDouble() != 0.0) {
-                    val timePause2 = (controller.tableValuesTestTime[1].pause.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[1].pause.value.replace(",", ".").toDouble() != 0.0) {
+                    val timePause2 =
+                        (controller.tableValuesTestTime[1].pause.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerPause2 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timePause2,
                         tickJob = {
@@ -812,8 +833,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: пауза 2 cекции: " + toHHmmss((timePause2 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: пауза 2 cекции"
                                 }
                             }
                         },
@@ -828,8 +848,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[2].start.value.toDouble() != 0.0) {
-                    val timeStart3 = (controller.tableValuesTestTime[2].start.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[2].start.value.replace(",", ".").toDouble() != 0.0) {
+                    val timeStart3 =
+                        (controller.tableValuesTestTime[2].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart3 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timeStart3,
                         tickJob = {
@@ -837,8 +858,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: нагрев 3 cекции: " + toHHmmss((timeStart3 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: нагрев 3 cекции"
                                 }
                             }
                         },
@@ -864,8 +884,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[2].pause.value.toDouble() != 0.0) {
-                    val timePause3 = (controller.tableValuesTestTime[2].pause.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[2].pause.value.replace(",", ".").toDouble() != 0.0) {
+                    val timePause3 =
+                        (controller.tableValuesTestTime[2].pause.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerPause3 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timePause3,
                         tickJob = {
@@ -873,8 +894,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: пауза 3 cекции: " + toHHmmss((timePause3 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: пауза 3 cекции"
                                 }
                             }
                         },
@@ -889,8 +909,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[3].start.value.toDouble() != 0.0) {
-                    val timeStart4 = (controller.tableValuesTestTime[3].start.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[3].start.value.replace(",", ".").toDouble() != 0.0) {
+                    val timeStart4 =
+                        (controller.tableValuesTestTime[3].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart4 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timeStart4,
                         tickJob = {
@@ -898,8 +919,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: нагрев 4 cекции: " + toHHmmss((timeStart4 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: нагрев 4 cекции"
                                 }
                             }
                         },
@@ -925,8 +945,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[3].pause.value.toDouble() != 0.0) {
-                    val timePause4 = (controller.tableValuesTestTime[3].pause.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[3].pause.value.replace(",", ".").toDouble() != 0.0) {
+                    val timePause4 =
+                        (controller.tableValuesTestTime[3].pause.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerPause4 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timePause4,
                         tickJob = {
@@ -934,8 +955,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: пауза 4 cекции: " + toHHmmss((timePause4 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: пауза 4 cекции"
                                 }
                             }
                         },
@@ -950,8 +970,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[4].start.value.toDouble() != 0.0) {
-                    val timeStart5 = (controller.tableValuesTestTime[4].start.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[4].start.value.replace(",", ".").toDouble() != 0.0) {
+                    val timeStart5 =
+                        (controller.tableValuesTestTime[4].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart5 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timeStart5,
                         tickJob = {
@@ -959,8 +980,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: нагрев 5 cекции: " + toHHmmss((timeStart5 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: нагрев 5 cекции"
                                 }
                             }
                         },
@@ -986,8 +1006,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[4].pause.value.toDouble() != 0.0) {
-                    val timePause5 = (controller.tableValuesTestTime[4].pause.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[4].pause.value.replace(",", ".").toDouble() != 0.0) {
+                    val timePause5 =
+                        (controller.tableValuesTestTime[4].pause.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerPause5 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timePause5,
                         tickJob = {
@@ -995,8 +1016,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: пауза 5 cекции: " + toHHmmss((timePause5 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: пауза 5 cекции"
                                 }
                             }
                         },
@@ -1011,8 +1031,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[5].start.value.toDouble() != 0.0) {
-                    val timeStart6 = (controller.tableValuesTestTime[5].start.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[5].start.value.replace(",", ".").toDouble() != 0.0) {
+                    val timeStart6 =
+                        (controller.tableValuesTestTime[5].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart6 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timeStart6,
                         tickJob = {
@@ -1020,8 +1041,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: нагрев 6 cекции: " + toHHmmss((timeStart6 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: нагрев 6 cекции"
                                 }
                             }
                         },
@@ -1047,8 +1067,9 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[5].pause.value.toDouble() != 0.0) {
-                    val timePause6 = (controller.tableValuesTestTime[5].pause.value.toDouble() * 60).toInt()
+                if (controller.tableValuesTestTime[5].pause.value.replace(",", ".").toDouble() != 0.0) {
+                    val timePause6 =
+                        (controller.tableValuesTestTime[5].pause.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerPause6 = CallbackTimer(
                         tickPeriod = 1.seconds, tickTimes = timePause6,
                         tickJob = {
@@ -1056,8 +1077,7 @@ class Test1Controller : TestController() {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text =
-                                        "Статус: пауза 6 cекции: " + toHHmmss((timePause6 - it.getCurrentTicks()) * 1000L)
+                                    mainView.labelTestStatus.text = "Статус: пауза 6 cекции"
                                 }
                             }
                         },
@@ -1092,6 +1112,7 @@ class Test1Controller : TestController() {
                 mainView.checkBoxTest1.isDisable = false
                 mainView.checkBoxTest2.isDisable = false
                 mainView.checkBoxTest3.isDisable = false
+                mainView.textFieldMaxTemp.isDisable = false
             }
         }
     }
@@ -1131,27 +1152,25 @@ class Test1Controller : TestController() {
     private fun startValues() {
         thread(isDaemon = true) {
             while (controller.isExperimentRunning) {
-                trmStatus11 = trm1.checkStatus(0) == 1
-                trmStatus12 = trm1.checkStatus(1) == 1
-                trmStatus13 = trm1.checkStatus(2) == 1
-                trmStatus14 = trm1.checkStatus(3) == 1
-                trmStatus15 = trm1.checkStatus(4) == 1
-                trmStatus16 = trm1.checkStatus(5) == 1
-                trmStatus17 = trm1.checkStatus(6) == 1
-
-                trmStatus21 = trm2.checkStatus(0) == 1
-                trmStatus22 = trm2.checkStatus(1) == 1
-                trmStatus23 = trm2.checkStatus(2) == 1
-                trmStatus24 = trm2.checkStatus(3) == 1
-                trmStatus25 = trm2.checkStatus(4) == 1
-                trmStatus26 = trm2.checkStatus(5) == 1
-
-                trmStatus31 = trm3.checkStatus(0) == 1
-                trmStatus32 = trm3.checkStatus(1) == 1
-                trmStatus33 = trm3.checkStatus(2) == 1
-                trmStatus34 = trm3.checkStatus(3) == 1
-                trmStatus35 = trm3.checkStatus(4) == 1
-                trmStatus36 = trm3.checkStatus(5) == 1
+                trmStatus11 = true //trm1.checkStatus(0) == 1
+                trmStatus12 = true //trm1.checkStatus(1) == 1
+                trmStatus13 = true //trm1.checkStatus(2) == 1
+                trmStatus14 = true //trm1.checkStatus(3) == 1
+                trmStatus15 = true //trm1.checkStatus(4) == 1
+                trmStatus16 = true //trm1.checkStatus(5) == 1
+                trmStatus17 = true //trm1.checkStatus(6) == 1
+                trmStatus21 = true //trm2.checkStatus(0) == 1
+                trmStatus22 = true //trm2.checkStatus(1) == 1
+                trmStatus23 = true //trm2.checkStatus(2) == 1
+                trmStatus24 = true //trm2.checkStatus(3) == 1
+                trmStatus25 = true //trm2.checkStatus(4) == 1
+                trmStatus26 = true //trm2.checkStatus(5) == 1
+                trmStatus31 = true //trm3.checkStatus(0) == 1
+                trmStatus32 = true //trm3.checkStatus(1) == 1
+                trmStatus33 = true //trm3.checkStatus(2) == 1
+                trmStatus34 = true //trm3.checkStatus(3) == 1
+                trmStatus35 = true //trm3.checkStatus(4) == 1
+                trmStatus36 = true //trm3.checkStatus(5) == 1
                 sleep(100)
             }
         }

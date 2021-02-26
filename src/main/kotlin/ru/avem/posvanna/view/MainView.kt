@@ -10,6 +10,7 @@ import javafx.stage.Modality
 import ru.avem.posvanna.controllers.MainViewController
 import ru.avem.posvanna.entities.*
 import ru.avem.posvanna.utils.callKeyBoard
+import ru.avem.posvanna.utils.toHHmmss
 import ru.avem.posvanna.view.Styles.Companion.extraHard
 import ru.avem.posvanna.view.Styles.Companion.megaHard
 import ru.avem.posvanna.view.Styles.Companion.stopStart
@@ -17,6 +18,7 @@ import tornadofx.*
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.system.exitProcess
+import kotlin.time.ExperimentalTime
 
 
 class MainView : View("Комплексный стенд для испытания ПОС лопасти несущего винта") {
@@ -45,12 +47,16 @@ class MainView : View("Комплексный стенд для испытани
     var checkBoxTest2: CheckBox by singleAssign()
     var checkBoxTest3: CheckBox by singleAssign()
 
+
+    var textFieldMaxTemp: TextField by singleAssign()
+
     override fun onBeforeShow() {
     }
 
     override fun onDock() {
     }
 
+    @ExperimentalTime
     override val root = borderpane {
         maxWidth = 1920.0
         maxHeight = 1000.0
@@ -105,6 +111,39 @@ class MainView : View("Комплексный стенд для испытани
                                     text = ""
                                     prefWidth = 100.0
                                     alignment = Pos.CENTER
+                                    action {
+
+                                        try {
+                                            labelTimeRemaining.text = toHHmmss(
+                                                (((controller.tableValuesTestTime[0].start.value.replace(",", ".")
+                                                    .toDouble())
+                                                        + (controller.tableValuesTestTime[0].pause.value.replace(",", ".")
+                                                    .toDouble()) +
+                                                        (controller.tableValuesTestTime[1].start.value.replace(",", ".")
+                                                            .toDouble())
+                                                        + (controller.tableValuesTestTime[1].pause.value.replace(",", ".")
+                                                    .toDouble()) +
+                                                        (controller.tableValuesTestTime[2].start.value.replace(",", ".")
+                                                            .toDouble())
+                                                        + (controller.tableValuesTestTime[2].pause.value.replace(",", ".")
+                                                    .toDouble()) +
+                                                        (controller.tableValuesTestTime[3].start.value.replace(",", ".")
+                                                            .toDouble())
+                                                        + (controller.tableValuesTestTime[3].pause.value.replace(",", ".")
+                                                    .toDouble()) +
+                                                        (controller.tableValuesTestTime[4].start.value.replace(",", ".")
+                                                            .toDouble())
+                                                        + (controller.tableValuesTestTime[4].pause.value.replace(",", ".")
+                                                    .toDouble()) +
+                                                        (controller.tableValuesTestTime[5].start.value.replace(",", ".")
+                                                            .toDouble())
+                                                        + (controller.tableValuesTestTime[5].pause.value.replace(",", ".")
+                                                    .toDouble()))
+                                                        * textFieldTimeCycle.text.replace(",", ".").toDouble()).toLong() * 1000
+                                            )
+                                        } catch (e: Exception) {
+                                        }
+                                    }
                                 }.addClass(extraHard)
                             }
                             tableViewTestTime = tableview(controller.tableValuesTestTime) {
@@ -118,9 +157,41 @@ class MainView : View("Комплексный стенд для испытани
                                 onEditStart {
                                     callKeyBoard()
                                 }
+                                onEditCommit {
+                                    try {
+                                        labelTimeRemaining.text = toHHmmss(
+                                            (((controller.tableValuesTestTime[0].start.value.replace(",", ".")
+                                                .toDouble())
+                                                    + (controller.tableValuesTestTime[0].pause.value.replace(",", ".")
+                                                .toDouble()) +
+                                                    (controller.tableValuesTestTime[1].start.value.replace(",", ".")
+                                                        .toDouble())
+                                                    + (controller.tableValuesTestTime[1].pause.value.replace(",", ".")
+                                                .toDouble()) +
+                                                    (controller.tableValuesTestTime[2].start.value.replace(",", ".")
+                                                        .toDouble())
+                                                    + (controller.tableValuesTestTime[2].pause.value.replace(",", ".")
+                                                .toDouble()) +
+                                                    (controller.tableValuesTestTime[3].start.value.replace(",", ".")
+                                                        .toDouble())
+                                                    + (controller.tableValuesTestTime[3].pause.value.replace(",", ".")
+                                                .toDouble()) +
+                                                    (controller.tableValuesTestTime[4].start.value.replace(",", ".")
+                                                        .toDouble())
+                                                    + (controller.tableValuesTestTime[4].pause.value.replace(",", ".")
+                                                .toDouble()) +
+                                                    (controller.tableValuesTestTime[5].start.value.replace(",", ".")
+                                                        .toDouble())
+                                                    + (controller.tableValuesTestTime[5].pause.value.replace(",", ".")
+                                                .toDouble()))
+                                                    * textFieldTimeCycle.text.replace(",", ".").toDouble()).toLong() * 1000
+                                        )
+                                    } catch (e: Exception) {
+                                    }
+                                }
                                 column("", TableValuesTestTime::descriptor.getter)
-                                column("Нагрев, мин", TableValuesTestTime::start.getter).makeEditable()
-                                column("Пауза, мин", TableValuesTestTime::pause.getter).makeEditable()
+                                column("Нагрев, сек", TableValuesTestTime::start.getter).makeEditable()
+                                column("Пауза, сек", TableValuesTestTime::pause.getter).makeEditable()
                             }
                         }
                         vbox(spacing = 16.0) {
@@ -196,6 +267,14 @@ class MainView : View("Комплексный стенд для испытани
                             bottomAnchor = 16.0
                         }
                         alignmentProperty().set(Pos.CENTER)
+                        vbox(spacing = 4.0) {
+                            label("Макс. температура")
+                            textFieldMaxTemp = textfield {
+                                callKeyBoard()
+                                prefWidth = 100.0
+                                alignment = Pos.CENTER
+                            }
+                        }
                         tableview(controller.tableValuesWaterTemp) {
                             minHeight = 96.0
                             maxHeight = 96.0

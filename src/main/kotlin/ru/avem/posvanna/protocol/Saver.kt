@@ -258,10 +258,12 @@ fun fillParameters18(
     val valuesForExcel34 = arrayListOf<Double>()
     val valuesForExcel35 = arrayListOf<Double>()
     val valuesForExcel36 = arrayListOf<Double>()
+
     var step = 1
     if (values11.size > 1000) {
         step = (values11.size - values11.size % 1000) / 1000
     }
+
     for (i in values11.indices step step) {
         valuesForExcel11.add(values11[i])
         valuesForExcel12.add(values12[i])
