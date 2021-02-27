@@ -34,6 +34,9 @@ class MainView : View("Комплексный стенд для испытани
 
     var textFieldTimeCycle: TextField by singleAssign()
     var tableViewTestTime: TableView<TableValuesTestTime> by singleAssign()
+    var tableViewTest1: TableView<TableValuesTest1> by singleAssign()
+    var tableViewTest2: TableView<TableValuesTest2> by singleAssign()
+    var tableViewTest3: TableView<TableValuesTest3> by singleAssign()
 
     var labelTimeRemaining: Label by singleAssign()
     var labelTestStatus: Label by singleAssign()
@@ -205,7 +208,7 @@ class MainView : View("Комплексный стенд для испытани
 
                             checkBoxTest1 = checkbox("1-я лопасть") {
                             }.addClass(extraHard)
-                            tableview(controller.tableValuesTest1) {
+                            tableViewTest1 = tableview(controller.tableValuesTest1) {
                                 minHeight = 346.0
                                 maxHeight = 346.0
                                 minWidth = 400.0
@@ -226,7 +229,7 @@ class MainView : View("Комплексный стенд для испытани
                             alignmentProperty().set(Pos.CENTER)
                             checkBoxTest2 = checkbox("2-я лопасть") {
                             }.addClass(extraHard)
-                            tableview(controller.tableValuesTest2) {
+                            tableViewTest2 = tableview(controller.tableValuesTest2) {
                                 minHeight = 346.0
                                 maxHeight = 346.0
                                 minWidth = 400.0
@@ -247,7 +250,7 @@ class MainView : View("Комплексный стенд для испытани
                             alignmentProperty().set(Pos.CENTER)
                             checkBoxTest3 = checkbox("3-я лопасть") {
                             }.addClass(extraHard)
-                            tableview(controller.tableValuesTest3) {
+                            tableViewTest3 = tableview(controller.tableValuesTest3) {
                                 minHeight = 346.0
                                 maxHeight = 346.0
                                 minWidth = 400.0

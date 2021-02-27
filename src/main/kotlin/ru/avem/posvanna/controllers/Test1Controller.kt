@@ -727,6 +727,11 @@ class Test1Controller : TestController() {
 
                 if (controller.tableValuesTestTime[0].start.value.replace(",", ".").toDouble() != 0.0) {
 
+                    mainView.tableViewTestTime.selectionModel.select(0)
+                    mainView.tableViewTest1.selectionModel.select(0)
+                    mainView.tableViewTest2.selectionModel.select(0)
+                    mainView.tableViewTest3.selectionModel.select(0)
+
                     val timeStart1 =
                         (controller.tableValuesTestTime[0].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart1 = CallbackTimer(
@@ -788,6 +793,12 @@ class Test1Controller : TestController() {
                 }
 
                 if (controller.tableValuesTestTime[1].start.value.replace(",", ".").toDouble() != 0.0) {
+
+                    mainView.tableViewTestTime.selectionModel.select(1)
+                    mainView.tableViewTest1.selectionModel.select(1)
+                    mainView.tableViewTest2.selectionModel.select(1)
+                    mainView.tableViewTest3.selectionModel.select(1)
+
                     val timeStart2 =
                         (controller.tableValuesTestTime[1].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart2 = CallbackTimer(
@@ -849,6 +860,12 @@ class Test1Controller : TestController() {
                 }
 
                 if (controller.tableValuesTestTime[2].start.value.replace(",", ".").toDouble() != 0.0) {
+
+                    mainView.tableViewTestTime.selectionModel.select(2)
+                    mainView.tableViewTest1.selectionModel.select(2)
+                    mainView.tableViewTest2.selectionModel.select(2)
+                    mainView.tableViewTest3.selectionModel.select(2)
+
                     val timeStart3 =
                         (controller.tableValuesTestTime[2].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart3 = CallbackTimer(
@@ -910,6 +927,12 @@ class Test1Controller : TestController() {
                 }
 
                 if (controller.tableValuesTestTime[3].start.value.replace(",", ".").toDouble() != 0.0) {
+
+                    mainView.tableViewTestTime.selectionModel.select(3)
+                    mainView.tableViewTest1.selectionModel.select(3)
+                    mainView.tableViewTest2.selectionModel.select(3)
+                    mainView.tableViewTest3.selectionModel.select(3)
+
                     val timeStart4 =
                         (controller.tableValuesTestTime[3].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart4 = CallbackTimer(
@@ -971,6 +994,12 @@ class Test1Controller : TestController() {
                 }
 
                 if (controller.tableValuesTestTime[4].start.value.replace(",", ".").toDouble() != 0.0) {
+
+                    mainView.tableViewTestTime.selectionModel.select(4)
+                    mainView.tableViewTest1.selectionModel.select(4)
+                    mainView.tableViewTest2.selectionModel.select(4)
+                    mainView.tableViewTest3.selectionModel.select(4)
+
                     val timeStart5 =
                         (controller.tableValuesTestTime[4].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart5 = CallbackTimer(
@@ -1032,6 +1061,12 @@ class Test1Controller : TestController() {
                 }
 
                 if (controller.tableValuesTestTime[5].start.value.replace(",", ".").toDouble() != 0.0) {
+
+                    mainView.tableViewTestTime.selectionModel.select(5)
+                    mainView.tableViewTest1.selectionModel.select(5)
+                    mainView.tableViewTest2.selectionModel.select(5)
+                    mainView.tableViewTest3.selectionModel.select(5)
+
                     val timeStart6 =
                         (controller.tableValuesTestTime[5].start.value.replace(",", ".").toDouble()).toInt()
                     val callbackTimerStart6 = CallbackTimer(

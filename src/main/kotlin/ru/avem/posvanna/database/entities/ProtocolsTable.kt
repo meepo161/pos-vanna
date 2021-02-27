@@ -14,7 +14,7 @@ object ProtocolsTable : IntIdTable() {
     val temp14 =  varchar("temp14", 99999999)
     val temp15 =  varchar("temp15", 99999999)
     val temp16 =  varchar("temp16", 99999999)
-    val temp17 =  varchar("temp16", 99999999)
+    val temp17 =  varchar("temp17", 99999999)
     val temp21 =  varchar("temp21", 99999999)
     val temp22 =  varchar("temp22", 99999999)
     val temp23 =  varchar("temp23", 99999999)
