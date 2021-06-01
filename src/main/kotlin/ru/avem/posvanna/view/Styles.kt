@@ -16,7 +16,9 @@ class Styles : Stylesheet() {
         val hard by cssclass()
         val extraHard by cssclass()
         val megaHard by cssclass()
+        val maxTemp by cssclass()
         val stopStart by cssclass()
+        val authorization by cssclass()
         val anchorPaneBorders by cssclass()
         val anchorPaneStatusColor by cssclass()
         val roundButton by cssclass()
@@ -28,6 +30,14 @@ class Styles : Stylesheet() {
     }
 
     init {
+        comboBox {
+            fontSize = 36.px
+        }
+        passwordField {
+            fontSize = 36.px
+            fontWeight = FontWeight.EXTRA_BOLD
+        }
+
         alert {
             baseColor = c("#222")
             fontSize = 18.px
@@ -79,12 +89,23 @@ class Styles : Stylesheet() {
             fontWeight = FontWeight.BOLD
         }
 
+        maxTemp {
+            fontSize = 30.px
+            fontWeight = FontWeight.BOLD
+        }
+
         extraHard {
             fontSize = 24.px
             fontWeight = FontWeight.BOLD
         }
 
         stopStart {
+            fontSize = 48.px
+            fontWeight = FontWeight.EXTRA_BOLD
+//            baseColor = c("#333")
+        }
+
+        authorization {
             fontSize = 60.px
             fontWeight = FontWeight.EXTRA_BOLD
 //            baseColor = c("#333")
@@ -128,19 +149,11 @@ class Styles : Stylesheet() {
         tableColumn {
             alignment = Pos.CENTER
             fontWeight = FontWeight.BOLD
-            fontSize = 22.px
+            fontSize = 30.px
         }
 
         tableRowCell {
             cellSize = 50.px
-        }
-
-        checkBox {
-            selected {
-                mark {
-                    backgroundColor += c("black")
-                }
-            }
         }
 
         vboxTextArea {
@@ -158,5 +171,13 @@ class Styles : Stylesheet() {
                 backgroundColor += c("red")
             }
         }
+        checkBox {
+            selected {
+                mark {
+                    backgroundColor += c("#FF0000")
+                }
+            }
+        }
     }
+
 }

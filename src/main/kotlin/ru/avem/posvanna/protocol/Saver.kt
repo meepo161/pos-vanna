@@ -12,6 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTBoolean
 import ru.avem.posvanna.app.Pos
 import ru.avem.posvanna.database.entities.Protocol
+import ru.avem.posvanna.database.entities.ProtocolRotorBlade
 import ru.avem.posvanna.database.entities.ProtocolSingle
 import ru.avem.posvanna.utils.Toast
 import ru.avem.posvanna.utils.copyFileFromStream
@@ -19,12 +20,12 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 
+
 var TO_DESIRED_ROW = 0
 
 fun saveProtocolAsWorkbook(protocol: Protocol, path: String = "protocol.xlsx") {
     val template = File(path)
     copyFileFromStream(Pos::class.java.getResource("protocol.xlsx").openStream(), template)
-
     try {
         XSSFWorkbook(template).use { wb ->
             val sheet = wb.getSheetAt(0)
@@ -38,6 +39,13 @@ fun saveProtocolAsWorkbook(protocol: Protocol, path: String = "protocol.xlsx") {
                                 "#PROTOCOL_NUMBER#" -> cell.setCellValue(protocol.id.toString())
                                 "#DATE#" -> cell.setCellValue(protocol.date)
                                 "#TIME#" -> cell.setCellValue(protocol.time)
+                                "#CIPHER1#" -> cell.setCellValue(protocol.cipher1)
+                                "#NUMBER_PRODUCT1#" -> cell.setCellValue(protocol.productName1)
+                                "#CIPHER2#" -> cell.setCellValue(protocol.cipher2)
+                                "#NUMBER_PRODUCT2#" -> cell.setCellValue(protocol.productName2)
+                                "#CIPHER3#" -> cell.setCellValue(protocol.cipher3)
+                                "#NUMBER_PRODUCT3#" -> cell.setCellValue(protocol.productName3)
+                                "#OPERATOR#" -> cell.setCellValue(protocol.operator)
 
                                 else -> {
                                     if (cell.stringCellValue.contains("#")) {
@@ -73,6 +81,7 @@ fun saveProtocolAsWorkbook(protocol: Protocol, path: String = "protocol.xlsx") {
                 0, 15
             )
             drawLineChart18(wb)
+            sheet.protectSheet("avem")
             val outStream = ByteArrayOutputStream()
             wb.write(outStream)
             outStream.close()
@@ -82,10 +91,67 @@ fun saveProtocolAsWorkbook(protocol: Protocol, path: String = "protocol.xlsx") {
     }
 }
 
-fun saveProtocolAsWorkbook(protocolSingle: ProtocolSingle, path: String = "protocol.xlsx", start: Int, end: Int) {
+fun saveProtocolAsWorkbook(
+    protocolRotorBlade: ProtocolRotorBlade,
+    path: String = "protocol1RotorBlade.xlsx"
+) {
     val template = File(path)
-    copyFileFromStream(Pos::class.java.getResource("protocol.xlsx").openStream(), template)
+    copyFileFromStream(Pos::class.java.getResource("protocol1RotorBlade.xlsx").openStream(), template)
+    try {
+        XSSFWorkbook(template).use { wb ->
+            val sheet = wb.getSheetAt(0)
+            for (iRow in 0 until 100) {
+                val row = sheet.getRow(iRow)
+                if (row != null) {
+                    for (iCell in 0 until 100) {
+                        val cell = row.getCell(iCell)
+                        if (cell != null && (cell.cellType == CellType.STRING)) {
+                            when (cell.stringCellValue) {
+                                "#PROTOCOL_NUMBER#" -> cell.setCellValue(protocolRotorBlade.id.toString())
+                                "#DATE#" -> cell.setCellValue(protocolRotorBlade.date)
+                                "#TIME#" -> cell.setCellValue(protocolRotorBlade.time)
+                                "#CIPHER#" -> cell.setCellValue(protocolRotorBlade.cipher)
+                                "#NUMBER_PRODUCT#" -> cell.setCellValue(protocolRotorBlade.productName)
+                                "#OPERATOR#" -> cell.setCellValue(protocolRotorBlade.operator)
+                                else -> {
+                                    if (cell.stringCellValue.contains("#")) {
+                                        cell.setCellValue("")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            fillParameters6(
+                wb,
+                protocolRotorBlade.temp1,
+                protocolRotorBlade.temp2,
+                protocolRotorBlade.temp3,
+                protocolRotorBlade.temp4,
+                protocolRotorBlade.temp5,
+                protocolRotorBlade.temp6,
+                0, 15
+            ) //TODO
+            drawLineChart6(wb)
+            sheet.protectSheet("avem")
+            val outStream = ByteArrayOutputStream()
+            wb.write(outStream)
+            outStream.close()
+        }
+    } catch (e: FileNotFoundException) {
+        Toast.makeText("Не удалось сохранить протокол на диск")
+    }
+}
 
+fun saveProtocolAsWorkbook(
+    protocolSingle: ProtocolSingle,
+    path: String = "protocol1Section.xlsx",
+    start: Int,
+    end: Int
+) {
+    val template = File(path)
+    copyFileFromStream(Pos::class.java.getResource("protocol1Section.xlsx").openStream(), template)
     try {
         XSSFWorkbook(template).use { wb ->
             val sheet = wb.getSheetAt(0)
@@ -111,7 +177,8 @@ fun saveProtocolAsWorkbook(protocolSingle: ProtocolSingle, path: String = "proto
                 }
             }
             fillParameters(wb, protocolSingle.temp, start, end)
-            drawLineChart(wb)
+            drawLineChart(wb, protocolSingle.section)
+            sheet.protectSheet("avem")
             val outStream = ByteArrayOutputStream()
             wb.write(outStream)
             outStream.close()
@@ -135,27 +202,28 @@ fun fillParameters(wb: XSSFWorkbook, dots: String, start: Int, end: Int) {
     row = sheet.createRow(rowNum)
     var columnNum = 0
     for (i in values.indices) {
-        columnNum = fillOneCell(row, columnNum, cellStyle, i  + start)
+        columnNum = fillOneCell(row, columnNum, cellStyle, i + start)
         columnNum = fillOneCell(row, columnNum, cellStyle, values[i])
         row = sheet.createRow(++rowNum)
         columnNum = 0
     }
 }
 
-private fun drawLineChart(workbook: XSSFWorkbook) {
+private fun drawLineChart(workbook: XSSFWorkbook, section: String) {
     val sheet = workbook.getSheet("Sheet1")
     val lastRowIndex = sheet.lastRowNum - 1
     val timeData = DataSources.fromNumericCellRange(sheet, CellRangeAddress(16, lastRowIndex, 0, 0))
     val valueData = DataSources.fromNumericCellRange(sheet, CellRangeAddress(16, lastRowIndex, 1, 1))
 
     var lineChart = createLineChart(sheet)
-    drawLineChart(lineChart, timeData, valueData)
+    drawLineChart(lineChart, timeData, valueData, section)
 }
 
 private fun drawLineChart(
     lineChart: XSSFChart,
     xAxisData: ChartDataSource<Number>,
-    yAxisData: ChartDataSource<Number>
+    yAxisData: ChartDataSource<Number>,
+    section: String
 ) {
     val data = lineChart.chartDataFactory.createLineChartData()
 
@@ -166,6 +234,8 @@ private fun drawLineChart(
     val series = data.addSeries(xAxisData, yAxisData)
     series.setTitle("График")
     lineChart.plot(data, xAxis, yAxis)
+    lineChart.axes[0].setTitle(section)
+    lineChart.axes[1].setTitle("T, °C")
 
     val plotArea = lineChart.ctChart.plotArea
     plotArea.lineChartArray[0].smooth
@@ -260,8 +330,8 @@ fun fillParameters18(
     val valuesForExcel36 = arrayListOf<Double>()
 
     var step = 1
-    if (values11.size > 1000) {
-        step = (values11.size - values11.size % 1000) / 1000
+    if (values11.size > 200) {
+        step = (values11.size - values11.size % 200) / 200
     }
 
     for (i in values11.indices step step) {
@@ -290,48 +360,239 @@ fun fillParameters18(
     val cellStyle: XSSFCellStyle = generateStyles(wb) as XSSFCellStyle
     var rowNum = rawNumber
     row = sheet.createRow(rowNum)
+    var dot = 0
     for (i in valuesForExcel11.indices) {
-        fillOneCell(row, columnNumber, cellStyle, i)
+        fillOneCell(row, columnNumber, cellStyle, dot)
         fillOneCell(row, columnNumber + 1, cellStyle, valuesForExcel11[i])
-        fillOneCell(row, columnNumber + 2, cellStyle, i)
-        fillOneCell(row, columnNumber + 3, cellStyle, valuesForExcel12[i])
-        fillOneCell(row, columnNumber + 4, cellStyle, i)
-        fillOneCell(row, columnNumber + 5, cellStyle, valuesForExcel13[i])
-        fillOneCell(row, columnNumber + 6, cellStyle, i)
-        fillOneCell(row, columnNumber + 7, cellStyle, valuesForExcel14[i])
-        fillOneCell(row, columnNumber + 8, cellStyle, i)
-        fillOneCell(row, columnNumber + 9, cellStyle, valuesForExcel15[i])
-        fillOneCell(row, columnNumber + 10, cellStyle, i)
-        fillOneCell(row, columnNumber + 11, cellStyle, valuesForExcel16[i])
-        fillOneCell(row, columnNumber + 12, cellStyle, i)
-        fillOneCell(row, columnNumber + 13, cellStyle, valuesForExcel21[i])
-        fillOneCell(row, columnNumber + 14, cellStyle, i)
-        fillOneCell(row, columnNumber + 15, cellStyle, valuesForExcel22[i])
-        fillOneCell(row, columnNumber + 16, cellStyle, i)
-        fillOneCell(row, columnNumber + 17, cellStyle, valuesForExcel23[i])
-        fillOneCell(row, columnNumber + 18, cellStyle, i)
-        fillOneCell(row, columnNumber + 19, cellStyle, valuesForExcel24[i])
-        fillOneCell(row, columnNumber + 20, cellStyle, i)
-        fillOneCell(row, columnNumber + 21, cellStyle, valuesForExcel25[i])
-        fillOneCell(row, columnNumber + 22, cellStyle, i)
-        fillOneCell(row, columnNumber + 23, cellStyle, valuesForExcel26[i])
-        fillOneCell(row, columnNumber + 24, cellStyle, i)
-        fillOneCell(row, columnNumber + 25, cellStyle, valuesForExcel31[i])
-        fillOneCell(row, columnNumber + 26, cellStyle, i)
-        fillOneCell(row, columnNumber + 27, cellStyle, valuesForExcel32[i])
-        fillOneCell(row, columnNumber + 28, cellStyle, i)
-        fillOneCell(row, columnNumber + 29, cellStyle, valuesForExcel33[i])
-        fillOneCell(row, columnNumber + 30, cellStyle, i)
-        fillOneCell(row, columnNumber + 31, cellStyle, valuesForExcel34[i])
-        fillOneCell(row, columnNumber + 32, cellStyle, i)
-        fillOneCell(row, columnNumber + 33, cellStyle, valuesForExcel35[i])
-        fillOneCell(row, columnNumber + 34, cellStyle, i)
-        fillOneCell(row, columnNumber + 35, cellStyle, valuesForExcel36[i])
-        fillOneCell(row, columnNumber + 36, cellStyle, i)
-        fillOneCell(row, columnNumber + 37, cellStyle, valuesForExcel17[i])
+        fillOneCell(row, columnNumber + 2, cellStyle, valuesForExcel12[i])
+        fillOneCell(row, columnNumber + 3, cellStyle, valuesForExcel13[i])
+        fillOneCell(row, columnNumber + 4, cellStyle, valuesForExcel14[i])
+        fillOneCell(row, columnNumber + 5, cellStyle, valuesForExcel15[i])
+        fillOneCell(row, columnNumber + 6, cellStyle, valuesForExcel16[i])
+        fillOneCell(row, columnNumber + 7, cellStyle, valuesForExcel21[i])
+        fillOneCell(row, columnNumber + 8, cellStyle, valuesForExcel22[i])
+        fillOneCell(row, columnNumber + 9, cellStyle, valuesForExcel23[i])
+        fillOneCell(row, columnNumber + 10, cellStyle, valuesForExcel24[i])
+        fillOneCell(row, columnNumber + 11, cellStyle, valuesForExcel25[i])
+        fillOneCell(row, columnNumber + 12, cellStyle, valuesForExcel26[i])
+        fillOneCell(row, columnNumber + 13, cellStyle, valuesForExcel31[i])
+        fillOneCell(row, columnNumber + 14, cellStyle, valuesForExcel32[i])
+        fillOneCell(row, columnNumber + 15, cellStyle, valuesForExcel33[i])
+        fillOneCell(row, columnNumber + 16, cellStyle, valuesForExcel34[i])
+        fillOneCell(row, columnNumber + 17, cellStyle, valuesForExcel35[i])
+        fillOneCell(row, columnNumber + 18, cellStyle, valuesForExcel36[i])
+        fillOneCell(row, columnNumber + 19, cellStyle, valuesForExcel17[i])
         row = sheet.createRow(++rowNum)
+        dot += step
     }
 
+}
+
+fun fillParameters6(
+    wb: XSSFWorkbook,
+    dots11: String,
+    dots12: String,
+    dots13: String,
+    dots14: String,
+    dots15: String,
+    dots16: String,
+    columnNumber: Int, rawNumber: Int
+) {
+    val values11 = dots11.removePrefix("[").removePrefix("'").removeSuffix("]")
+        .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+    val values12 = dots12.removePrefix("[").removePrefix("'").removeSuffix("]")
+        .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+    val values13 = dots13.removePrefix("[").removePrefix("'").removeSuffix("]")
+        .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+    val values14 = dots14.removePrefix("[").removePrefix("'").removeSuffix("]")
+        .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+    val values15 = dots15.removePrefix("[").removePrefix("'").removeSuffix("]")
+        .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+    val values16 = dots16.removePrefix("[").removePrefix("'").removeSuffix("]")
+        .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+
+    val valuesForExcel11 = arrayListOf<Double>()
+    val valuesForExcel12 = arrayListOf<Double>()
+    val valuesForExcel13 = arrayListOf<Double>()
+    val valuesForExcel14 = arrayListOf<Double>()
+    val valuesForExcel15 = arrayListOf<Double>()
+    val valuesForExcel16 = arrayListOf<Double>()
+
+    var step = 1
+    if (values11.size > 200) {
+        step = (values11.size - values11.size % 200) / 200
+    }
+
+    for (i in values11.indices step step) {
+        valuesForExcel11.add(values11[i])
+        valuesForExcel12.add(values12[i])
+        valuesForExcel13.add(values13[i])
+        valuesForExcel14.add(values14[i])
+        valuesForExcel15.add(values15[i])
+        valuesForExcel16.add(values16[i])
+    }
+    val sheet = wb.getSheetAt(0)
+    var row: Row
+    val cellStyle: XSSFCellStyle = generateStyles(wb) as XSSFCellStyle
+    var rowNum = rawNumber
+    row = sheet.createRow(rowNum)
+    var dot = 0
+    for (i in valuesForExcel11.indices) {
+        fillOneCell(row, columnNumber, cellStyle, dot)
+        fillOneCell(row, columnNumber + 1, cellStyle, valuesForExcel11[i])
+        fillOneCell(row, columnNumber + 2, cellStyle, valuesForExcel12[i])
+        fillOneCell(row, columnNumber + 3, cellStyle, valuesForExcel13[i])
+        fillOneCell(row, columnNumber + 4, cellStyle, valuesForExcel14[i])
+        fillOneCell(row, columnNumber + 5, cellStyle, valuesForExcel15[i])
+        fillOneCell(row, columnNumber + 6, cellStyle, valuesForExcel16[i])
+        row = sheet.createRow(++rowNum)
+        dot += step
+    }
+
+}
+
+private fun drawLineChart18(workbook: XSSFWorkbook) {
+    val sheet = workbook.getSheet("Sheet1")
+    val sheet2 = workbook.getSheet("Sheet2")
+    val lastRowIndex = sheet.lastRowNum - 4
+
+    var i = 0
+    val timeData11 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, i, i))
+    val valueData11 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData12 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData13 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData14 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData15 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData16 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData21 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData22 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData23 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData24 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData25 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData26 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData31 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData32 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData33 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData34 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData35 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData36 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData17 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+
+    var lastRowForGraph = 0
+    val graphHeight = 20
+    val graphSpace = graphHeight + 2
+    val lineChart11 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart11, timeData11, valueData11, "1 лопасть 1 секция")
+    lastRowForGraph += graphSpace
+    val lineChart12 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart12, timeData11, valueData12, "1 лопасть 2 секция")
+    lastRowForGraph += graphSpace
+    val lineChart13 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart13, timeData11, valueData13, "1 лопасть 3 секция")
+    lastRowForGraph += graphSpace
+    val lineChart14 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart14, timeData11, valueData14, "1 лопасть 4 секция")
+    lastRowForGraph += graphSpace
+    val lineChart15 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart15, timeData11, valueData15, "1 лопасть 5 секция")
+    lastRowForGraph += graphSpace
+    val lineChart16 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart16, timeData11, valueData16, "1 лопасть 6 секция")
+    lastRowForGraph += graphSpace
+    val lineChart21 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart21, timeData11, valueData21, "2 лопасть 1 секция")
+    lastRowForGraph += graphSpace
+    val lineChart22 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart22, timeData11, valueData22, "2 лопасть 2 секция")
+    lastRowForGraph += graphSpace
+    val lineChart23 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart23, timeData11, valueData23, "2 лопасть 3 секция")
+    lastRowForGraph += graphSpace
+    val lineChart24 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart24, timeData11, valueData24, "2 лопасть 4 секция")
+    lastRowForGraph += graphSpace
+    val lineChart25 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart25, timeData11, valueData25, "2 лопасть 5 секция")
+    lastRowForGraph += graphSpace
+    val lineChart26 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart26, timeData11, valueData26, "2 лопасть 6 секция")
+    lastRowForGraph += graphSpace
+    val lineChart31 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart31, timeData11, valueData31, "3 лопасть 1 секция")
+    lastRowForGraph += graphSpace
+    val lineChart32 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart32, timeData11, valueData32, "3 лопасть 2 секция")
+    lastRowForGraph += graphSpace
+    val lineChart33 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart33, timeData11, valueData33, "3 лопасть 3 секция")
+    lastRowForGraph += graphSpace
+    val lineChart34 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart34, timeData11, valueData34, "3 лопасть 4 секция")
+    lastRowForGraph += graphSpace
+    val lineChart35 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart35, timeData11, valueData35, "3 лопасть 5 секция")
+    lastRowForGraph += graphSpace
+    val lineChart36 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart36, timeData11, valueData36, "3 лопасть 6 секция")
+    lastRowForGraph += graphSpace
+    val lineChart17 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart17, timeData11, valueData17, "Вода")
+    lastRowForGraph += graphSpace
+}
+
+private fun drawLineChart6(workbook: XSSFWorkbook) {
+    val sheet = workbook.getSheet("Sheet1")
+    val lastRowIndex = sheet.lastRowNum - 1
+    var i = 0
+
+    val timeData11 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, i, i))
+    val valueData11 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData12 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData13 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData14 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData15 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData16 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+
+    val lineChart11 = createLineChart(sheet, 16, 26, 8, 38)
+    drawLineChart18(lineChart11, timeData11, valueData11, "1 секция")
+    val lineChart12 = createLineChart(sheet, 27, 37, 8, 38)
+    drawLineChart18(lineChart12, timeData11, valueData12, "2 секция")
+    val lineChart13 = createLineChart(sheet, 38, 48, 8, 38)
+    drawLineChart18(lineChart13, timeData11, valueData13, "3 секция")
+    val lineChart14 = createLineChart(sheet, 49, 59, 8, 38)
+    drawLineChart18(lineChart14, timeData11, valueData14, "4 секция")
+    val lineChart15 = createLineChart(sheet, 60, 70, 8, 38)
+    drawLineChart18(lineChart15, timeData11, valueData15, "5 секция")
+    val lineChart16 = createLineChart(sheet, 72, 82, 8, 38)
+    drawLineChart18(lineChart16, timeData11, valueData16, "6 секция")
+}
+
+private fun drawLineChart18(
+    lineChart: XSSFChart,
+    xAxisData: ChartDataSource<Number>,
+    yAxisData: ChartDataSource<Number>,
+    nameOfOI: String
+) {
+    val data = lineChart.chartDataFactory.createLineChartData()
+    val xAxis = lineChart.chartAxisFactory.createCategoryAxis(AxisPosition.BOTTOM)
+    val yAxis = lineChart.createValueAxis(AxisPosition.LEFT)
+    yAxis.crosses = org.apache.poi.ss.usermodel.charts.AxisCrosses.AUTO_ZERO
+
+    val series = data.addSeries(xAxisData, yAxisData)
+    series.setTitle("График")
+    lineChart.plot(data, xAxis, yAxis)
+
+    lineChart.axes[0].setTitle(nameOfOI)
+    lineChart.axes[1].setTitle("T, °C")
+
+    val plotArea = lineChart.ctChart.plotArea
+    plotArea.lineChartArray[0].smooth
+    val ctBool = CTBoolean.Factory.newInstance()
+    ctBool.`val` = false
+    plotArea.lineChartArray[0].smooth = ctBool
+    for (series in plotArea.lineChartArray[0].serArray) {
+        series.smooth = ctBool
+    }
 }
 
 private fun fillOneCell(row: Row, columnNum: Int, cellStyle: XSSFCellStyle, points: Double): Int {
@@ -360,110 +621,9 @@ private fun generateStyles(wb: XSSFWorkbook): CellStyle {
     return headStyle
 }
 
-private fun drawLineChart18(workbook: XSSFWorkbook) {
-    val sheet = workbook.getSheet("Sheet1")
-    val lastRowIndex = sheet.lastRowNum - 1
-
-    val timeData11 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 0, 0))
-    val valueData11 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 1, 1))
-
-    val timeData12 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 2, 2))
-    val valueData12 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 3, 3))
-
-    val timeData13 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 4, 4))
-    val valueData13 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 5, 5))
-
-    val timeData14 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 6, 6))
-    val valueData14 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 7, 7))
-
-    val timeData15 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 8, 8))
-    val valueData15 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 9, 9))
-
-    val timeData16 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 10, 10))
-    val valueData16 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 11, 11))
-
-    val timeData21 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 12, 12))
-    val valueData21 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 13, 13))
-
-    val timeData22 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 14, 14))
-    val valueData22 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 15, 15))
-
-    val timeData23 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 16, 16))
-    val valueData23 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 17, 17))
-
-    val timeData24 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 18, 18))
-    val valueData24 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 19, 19))
-
-    val timeData25 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 20, 20))
-    val valueData25 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 21, 21))
-
-    val timeData26 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 22, 22))
-    val valueData26 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 23, 23))
-
-    val timeData31 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 24, 24))
-    val valueData31 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 25, 25))
-
-    val timeData32 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 26, 26))
-    val valueData32 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 27, 27))
-
-    val timeData33 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 28, 28))
-    val valueData33 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 29, 29))
-
-    val timeData34 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 30, 30))
-    val valueData34 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 31, 31))
-
-    val timeData35 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 32, 32))
-    val valueData35 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 33, 33))
-
-    val timeData36 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 34, 34))
-    val valueData36 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 35, 35))
-
-    val timeData17 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 36, 36))
-    val valueData17 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, 37, 37))
-
-    val lineChart11 = createLineChart(sheet, 16, 26)
-    drawLineChart18(lineChart11, timeData11, valueData11)
-    val lineChart12 = createLineChart(sheet, 27, 37)
-    drawLineChart18(lineChart12, timeData12, valueData12)
-    val lineChart13 = createLineChart(sheet, 38, 48)
-    drawLineChart18(lineChart13, timeData13, valueData13)
-    val lineChart14 = createLineChart(sheet, 49, 59)
-    drawLineChart18(lineChart14, timeData14, valueData14)
-    val lineChart15 = createLineChart(sheet, 60, 70)
-    drawLineChart18(lineChart15, timeData15, valueData15)
-    val lineChart16 = createLineChart(sheet, 71, 81)
-    drawLineChart18(lineChart16, timeData16, valueData16)
-    val lineChart21 = createLineChart(sheet, 82, 92)
-    drawLineChart18(lineChart21, timeData21, valueData21)
-    val lineChart22 = createLineChart(sheet, 93, 103)
-    drawLineChart18(lineChart22, timeData22, valueData22)
-    val lineChart23 = createLineChart(sheet, 104, 114)
-    drawLineChart18(lineChart23, timeData23, valueData23)
-    val lineChart24 = createLineChart(sheet, 115, 125)
-    drawLineChart18(lineChart24, timeData24, valueData24)
-    val lineChart25 = createLineChart(sheet, 126, 136)
-    drawLineChart18(lineChart25, timeData25, valueData25)
-    val lineChart26 = createLineChart(sheet, 137, 147)
-    drawLineChart18(lineChart26, timeData26, valueData26)
-    val lineChart31 = createLineChart(sheet, 148, 158)
-    drawLineChart18(lineChart31, timeData31, valueData31)
-    val lineChart32 = createLineChart(sheet, 159, 169)
-    drawLineChart18(lineChart32, timeData32, valueData32)
-    val lineChart33 = createLineChart(sheet, 170, 180)
-    drawLineChart18(lineChart33, timeData33, valueData33)
-    val lineChart34 = createLineChart(sheet, 181, 191)
-    drawLineChart18(lineChart34, timeData34, valueData34)
-    val lineChart35 = createLineChart(sheet, 192, 202)
-    drawLineChart18(lineChart35, timeData35, valueData35)
-    val lineChart36 = createLineChart(sheet, 203, 213)
-    drawLineChart18(lineChart36, timeData36, valueData36)
-    val lineChart17 = createLineChart(sheet, 214, 224)
-    drawLineChart18(lineChart17, timeData17, valueData17)
-}
-
-private fun createLineChart(sheet: XSSFSheet, rowStart: Int, rowEnd: Int): XSSFChart {
+private fun createLineChart(sheet: XSSFSheet, rowStart: Int, rowEnd: Int, col1: Int = 1, col2: Int = 19): XSSFChart {
     val drawing = sheet.createDrawingPatriarch()
-    val anchor = drawing.createAnchor(0, 0, 0, 0, 38, rowStart, 48, rowEnd)
+    val anchor = drawing.createAnchor(0, 0, 0, 0, col1, rowStart, col2, rowEnd)
 
     return drawing.createChart(anchor)
 }
@@ -473,29 +633,4 @@ private fun createLineChart(sheet: XSSFSheet): XSSFChart {
     val anchor = drawing.createAnchor(0, 0, 0, 0, 3, 16, 36, 26)
 
     return drawing.createChart(anchor)
-}
-
-private fun drawLineChart18(
-    lineChart: XSSFChart,
-    xAxisData: ChartDataSource<Number>,
-    yAxisData: ChartDataSource<Number>
-) {
-    val data = lineChart.chartDataFactory.createLineChartData()
-
-    val xAxis = lineChart.chartAxisFactory.createCategoryAxis(AxisPosition.BOTTOM)
-    val yAxis = lineChart.createValueAxis(AxisPosition.LEFT)
-    yAxis.crosses = org.apache.poi.ss.usermodel.charts.AxisCrosses.AUTO_ZERO
-
-    val series = data.addSeries(xAxisData, yAxisData)
-    series.setTitle("График")
-    lineChart.plot(data, xAxis, yAxis)
-
-    val plotArea = lineChart.ctChart.plotArea
-    plotArea.lineChartArray[0].smooth
-    val ctBool = CTBoolean.Factory.newInstance()
-    ctBool.`val` = false
-    plotArea.lineChartArray[0].smooth = ctBool
-    for (series in plotArea.lineChartArray[0].serArray) {
-        series.smooth = ctBool
-    }
 }

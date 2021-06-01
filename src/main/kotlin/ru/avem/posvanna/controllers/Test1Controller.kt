@@ -1,6 +1,7 @@
 package ru.avem.posvanna.controllers
 
 import javafx.application.Platform
+import javafx.scene.control.ButtonType
 import javafx.scene.text.Text
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.posvanna.communication.model.CommunicationModel
@@ -8,12 +9,12 @@ import ru.avem.posvanna.communication.model.devices.owen.pr.OwenPrModel
 import ru.avem.posvanna.communication.model.devices.owen.trm136.Trm136Model
 import ru.avem.posvanna.communication.model.devices.parma.ParmaModel
 import ru.avem.posvanna.database.entities.Protocol
+import ru.avem.posvanna.protocol.saveProtocolAsWorkbook
 import ru.avem.posvanna.utils.*
 import ru.avem.posvanna.view.MainView
-import tornadofx.add
-import tornadofx.runLater
-import tornadofx.seconds
-import tornadofx.style
+import tornadofx.*
+import java.awt.Desktop
+import java.io.File
 import java.text.SimpleDateFormat
 import kotlin.concurrent.thread
 import kotlin.experimental.and
@@ -208,6 +209,8 @@ class Test1Controller : TestController() {
     private var listOfValues36 = mutableListOf<String>()
     //endregion
 
+    var isClicked = false
+
     private fun appendOneMessageToLog(tag: LogTag, message: String) {
         if (logBuffer == null || logBuffer != message) {
             logBuffer = message
@@ -353,6 +356,7 @@ class Test1Controller : TestController() {
             controller.cause = ""
             controller.isExperimentRunning = true
             isExperimentEnded = false
+            isClicked = false
             appendMessageToLog(LogTag.DEBUG, "Начало испытания")
             sleep(1000)
 
@@ -429,6 +433,7 @@ class Test1Controller : TestController() {
             }
 
             if (controller.isExperimentRunning && controller.isDevicesResponding()) {
+                soundWarning(1, 1000)
                 appendMessageToLog(LogTag.DEBUG, "Подготовка стенда")
                 startValues()
                 sleep(2000)
@@ -439,17 +444,12 @@ class Test1Controller : TestController() {
 
             val allTime =
                 (((controller.tableValuesTestTime[0].start.value.replace(",", ".").toDouble())
-                        + (controller.tableValuesTestTime[0].pause.value.replace(",", ".").toDouble()) +
-                        (controller.tableValuesTestTime[1].start.value.replace(",", ".").toDouble())
-                        + (controller.tableValuesTestTime[1].pause.value.replace(",", ".").toDouble()) +
-                        (controller.tableValuesTestTime[2].start.value.replace(",", ".").toDouble())
-                        + (controller.tableValuesTestTime[2].pause.value.replace(",", ".").toDouble()) +
-                        (controller.tableValuesTestTime[3].start.value.replace(",", ".").toDouble())
-                        + (controller.tableValuesTestTime[3].pause.value.replace(",", ".").toDouble()) +
-                        (controller.tableValuesTestTime[4].start.value.replace(",", ".").toDouble())
-                        + (controller.tableValuesTestTime[4].pause.value.replace(",", ".").toDouble()) +
-                        (controller.tableValuesTestTime[5].start.value.replace(",", ".").toDouble())
-                        + (controller.tableValuesTestTime[5].pause.value.replace(",", ".").toDouble()))
+                        + (controller.tableValuesTestTime[1].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[2].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[3].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[4].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTime[5].start.value.replace(",", ".").toDouble())
+                        + (controller.tableValuesTestTimePause[0].pause.value.replace(",", ".").toDouble()))
                         * mainView.textFieldTimeCycle.text.replace(",", ".").toDouble()).toInt()
             CallbackTimer(
                 tickPeriod = 1.seconds, tickTimes = allTime,
@@ -727,6 +727,8 @@ class Test1Controller : TestController() {
 
                 if (controller.tableValuesTestTime[0].start.value.replace(",", ".").toDouble() != 0.0) {
 
+
+                    mainView.tableViewTestTimePause.selectionModel.clearSelection()
                     mainView.tableViewTestTime.selectionModel.select(0)
                     mainView.tableViewTest1.selectionModel.select(0)
                     mainView.tableViewTest2.selectionModel.select(0)
@@ -762,31 +764,6 @@ class Test1Controller : TestController() {
                         sleep(100)
                     }
 
-                    if (controller.isExperimentRunning) {
-                        owenPR.offAllKMs()
-                    }
-                }
-
-                if (controller.tableValuesTestTime[0].pause.value.replace(",", ".").toDouble() != 0.0) {
-                    val timePause1 =
-                        (controller.tableValuesTestTime[0].pause.value.replace(",", ".").toDouble()).toInt()
-                    val callbackTimerPause1 = CallbackTimer(
-                        tickPeriod = 1.seconds, tickTimes = timePause1,
-                        tickJob = {
-                            if (!controller.isExperimentRunning) {
-                                it.stop()
-                            } else {
-                                runLater {
-                                    mainView.labelTestStatus.text = "Статус: пауза 1 cекции"
-                                }
-                            }
-                        },
-                        onFinishJob = {
-                        })
-
-                    while (controller.isExperimentRunning && callbackTimerPause1.isRunning) {
-                        sleep(100)
-                    }
                     if (controller.isExperimentRunning) {
                         owenPR.offAllKMs()
                     }
@@ -834,31 +811,6 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[1].pause.value.replace(",", ".").toDouble() != 0.0) {
-                    val timePause2 =
-                        (controller.tableValuesTestTime[1].pause.value.replace(",", ".").toDouble()).toInt()
-                    val callbackTimerPause2 = CallbackTimer(
-                        tickPeriod = 1.seconds, tickTimes = timePause2,
-                        tickJob = {
-                            if (!controller.isExperimentRunning) {
-                                it.stop()
-                            } else {
-                                runLater {
-                                    mainView.labelTestStatus.text = "Статус: пауза 2 cекции"
-                                }
-                            }
-                        },
-                        onFinishJob = {
-                        })
-
-                    while (controller.isExperimentRunning && callbackTimerPause2.isRunning) {
-                        sleep(100)
-                    }
-                    if (controller.isExperimentRunning) {
-                        owenPR.offAllKMs()
-                    }
-                }
-
                 if (controller.tableValuesTestTime[2].start.value.replace(",", ".").toDouble() != 0.0) {
 
                     mainView.tableViewTestTime.selectionModel.select(2)
@@ -896,31 +848,6 @@ class Test1Controller : TestController() {
                         sleep(100)
                     }
 
-                    if (controller.isExperimentRunning) {
-                        owenPR.offAllKMs()
-                    }
-                }
-
-                if (controller.tableValuesTestTime[2].pause.value.replace(",", ".").toDouble() != 0.0) {
-                    val timePause3 =
-                        (controller.tableValuesTestTime[2].pause.value.replace(",", ".").toDouble()).toInt()
-                    val callbackTimerPause3 = CallbackTimer(
-                        tickPeriod = 1.seconds, tickTimes = timePause3,
-                        tickJob = {
-                            if (!controller.isExperimentRunning) {
-                                it.stop()
-                            } else {
-                                runLater {
-                                    mainView.labelTestStatus.text = "Статус: пауза 3 cекции"
-                                }
-                            }
-                        },
-                        onFinishJob = {
-                        })
-
-                    while (controller.isExperimentRunning && callbackTimerPause3.isRunning) {
-                        sleep(100)
-                    }
                     if (controller.isExperimentRunning) {
                         owenPR.offAllKMs()
                     }
@@ -968,31 +895,6 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[3].pause.value.replace(",", ".").toDouble() != 0.0) {
-                    val timePause4 =
-                        (controller.tableValuesTestTime[3].pause.value.replace(",", ".").toDouble()).toInt()
-                    val callbackTimerPause4 = CallbackTimer(
-                        tickPeriod = 1.seconds, tickTimes = timePause4,
-                        tickJob = {
-                            if (!controller.isExperimentRunning) {
-                                it.stop()
-                            } else {
-                                runLater {
-                                    mainView.labelTestStatus.text = "Статус: пауза 4 cекции"
-                                }
-                            }
-                        },
-                        onFinishJob = {
-                        })
-
-                    while (controller.isExperimentRunning && callbackTimerPause4.isRunning) {
-                        sleep(100)
-                    }
-                    if (controller.isExperimentRunning) {
-                        owenPR.offAllKMs()
-                    }
-                }
-
                 if (controller.tableValuesTestTime[4].start.value.replace(",", ".").toDouble() != 0.0) {
 
                     mainView.tableViewTestTime.selectionModel.select(4)
@@ -1030,31 +932,6 @@ class Test1Controller : TestController() {
                         sleep(100)
                     }
 
-                    if (controller.isExperimentRunning) {
-                        owenPR.offAllKMs()
-                    }
-                }
-
-                if (controller.tableValuesTestTime[4].pause.value.replace(",", ".").toDouble() != 0.0) {
-                    val timePause5 =
-                        (controller.tableValuesTestTime[4].pause.value.replace(",", ".").toDouble()).toInt()
-                    val callbackTimerPause5 = CallbackTimer(
-                        tickPeriod = 1.seconds, tickTimes = timePause5,
-                        tickJob = {
-                            if (!controller.isExperimentRunning) {
-                                it.stop()
-                            } else {
-                                runLater {
-                                    mainView.labelTestStatus.text = "Статус: пауза 5 cекции"
-                                }
-                            }
-                        },
-                        onFinishJob = {
-                        })
-
-                    while (controller.isExperimentRunning && callbackTimerPause5.isRunning) {
-                        sleep(100)
-                    }
                     if (controller.isExperimentRunning) {
                         owenPR.offAllKMs()
                     }
@@ -1102,24 +979,31 @@ class Test1Controller : TestController() {
                     }
                 }
 
-                if (controller.tableValuesTestTime[5].pause.value.replace(",", ".").toDouble() != 0.0) {
-                    val timePause6 =
-                        (controller.tableValuesTestTime[5].pause.value.replace(",", ".").toDouble()).toInt()
-                    val callbackTimerPause6 = CallbackTimer(
-                        tickPeriod = 1.seconds, tickTimes = timePause6,
+                if (controller.tableValuesTestTimePause[0].pause.value.replace(",", ".").toDouble() != 0.0) {
+
+                    mainView.tableViewTestTimePause.selectionModel.select(0)
+                    mainView.tableViewTestTime.selectionModel.clearSelection()
+                    mainView.tableViewTest1.selectionModel.clearSelection()
+                    mainView.tableViewTest2.selectionModel.clearSelection()
+                    mainView.tableViewTest3.selectionModel.clearSelection()
+
+                    val timePause =
+                        (controller.tableValuesTestTimePause[0].pause.value.replace(",", ".").toDouble()).toInt()
+                    val callbackTimerPause = CallbackTimer(
+                        tickPeriod = 1.seconds, tickTimes = timePause,
                         tickJob = {
                             if (!controller.isExperimentRunning) {
                                 it.stop()
                             } else {
                                 runLater {
-                                    mainView.labelTestStatus.text = "Статус: пауза 6 cекции"
+                                    mainView.labelTestStatus.text = "Статус: пауза"
                                 }
                             }
                         },
                         onFinishJob = {
                         })
 
-                    while (controller.isExperimentRunning && callbackTimerPause6.isRunning) {
+                    while (controller.isExperimentRunning && callbackTimerPause.isRunning) {
                         sleep(100)
                     }
                     if (controller.isExperimentRunning) {
@@ -1128,26 +1012,43 @@ class Test1Controller : TestController() {
                 }
             }
 
-            if (listOfValues11.isNotEmpty()) {
-                saveProtocolToDB()
-            }
-
             owenPR.offAllKMs()
+
             appendMessageToLog(LogTag.MESSAGE, "Испытание завершено")
             setResult()
 
+            soundWarning(3, 1000)
+
             finalizeExperiment()
-            runLater {
-                mainView.labelTestStatus.text = ""
-                mainView.tableViewTestTime.isDisable = false
-                mainView.textFieldTimeCycle.isDisable = false
-                mainView.buttonStart.isDisable = false
-                mainView.buttonStop.isDisable = true
-                mainView.mainMenubar.isDisable = false
-                mainView.checkBoxTest1.isDisable = false
-                mainView.checkBoxTest2.isDisable = false
-                mainView.checkBoxTest3.isDisable = false
-                mainView.textFieldMaxTemp.isDisable = false
+
+            if (listOfValues11.isNotEmpty()) {
+                saveProtocolToDB()
+                Singleton.currentProtocol = transaction {
+                    Protocol.all().toList().asObservable()
+                }.last()
+                runLater {
+                    confirm(
+                        "Печать протокола",
+                        "Испытание завершено. Вы хотите напечатать протокол?",
+                        ButtonType.YES, ButtonType.NO,
+                        owner = mainView.currentWindow,
+                        title = "Печать"
+                    ) {
+                        saveProtocolAsWorkbook(Singleton.currentProtocol)
+                        Desktop.getDesktop().print(File("protocol.xlsx"))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun soundWarning(times: Int, sleep: Long) {
+        thread(isDaemon = true) {
+            for (i in 0..times) {
+                owenPR.onSound()
+                sleep(sleep)
+                owenPR.offSound()
+                sleep(sleep)
             }
         }
     }
@@ -1161,6 +1062,13 @@ class Test1Controller : TestController() {
             Protocol.new {
                 date = dateFormatter.format(unixTime).toString()
                 time = timeFormatter.format(unixTime).toString()
+                cipher1 = mainView.tfCipher1.text.toString()
+                productName1 = mainView.tfProductNumber1.text.toString()
+                cipher2 = mainView.tfCipher2.text.toString()
+                productName2 = mainView.tfProductNumber2.text.toString()
+                cipher3 = mainView.tfCipher3.text.toString()
+                productName3 = mainView.tfProductNumber3.text.toString()
+                operator = controller.position1
                 temp11 = listOfValues11.toString()
                 temp12 = listOfValues12.toString()
                 temp13 = listOfValues13.toString()
@@ -1214,8 +1122,10 @@ class Test1Controller : TestController() {
     private fun setResult() {
         if (controller.cause.isNotEmpty()) {
             appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: ${controller.cause}")
+            soundError()
         } else if (!controller.isDevicesResponding()) {
             appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: потеряна связь с устройствами")
+            soundError()
         } else {
             appendMessageToLog(LogTag.MESSAGE, "Испытание завершено успешно")
         }
@@ -1226,6 +1136,17 @@ class Test1Controller : TestController() {
         controller.isExperimentRunning = false
 //        owenPR.offAllKMs()
         CommunicationModel.clearPollingRegisters()
-
+        runLater {
+            mainView.labelTestStatus.text = ""
+            mainView.tableViewTestTime.isDisable = false
+            mainView.textFieldTimeCycle.isDisable = false
+            mainView.buttonStart.isDisable = false
+            mainView.buttonStop.isDisable = true
+            mainView.mainMenubar.isDisable = false
+            mainView.checkBoxTest1.isDisable = false
+            mainView.checkBoxTest2.isDisable = false
+            mainView.checkBoxTest3.isDisable = false
+            mainView.textFieldMaxTemp.isDisable = false
+        }
     }
 }

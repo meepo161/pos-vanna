@@ -34,7 +34,9 @@ data class TableValuesTest3(
 
 data class TableValuesTestTime(
         var descriptor: StringProperty,
-        var start: StringProperty,
+        var start: StringProperty
+)
+data class TableValuesTestTimePause(
         var pause: StringProperty
 )
 

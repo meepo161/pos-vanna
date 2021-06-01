@@ -234,6 +234,10 @@ class OwenPrController(
         onBitInRegister3(getRegisterById(OwenPrModel.KMS3_REGISTER), 2)
     }
 
+    fun onSound() {
+        onBitInRegister3(getRegisterById(OwenPrModel.KMS3_REGISTER), 8)
+    }
+
     fun off11() {
         offBitInRegister(getRegisterById(OwenPrModel.KMS1_REGISTER), 1)
     }
@@ -304,6 +308,10 @@ class OwenPrController(
 
     fun off36() {
         offBitInRegister3(getRegisterById(OwenPrModel.KMS3_REGISTER), 2)
+    }
+
+    fun offSound() {
+        offBitInRegister3(getRegisterById(OwenPrModel.KMS3_REGISTER), 8)
     }
 
     fun offAllKMs() {

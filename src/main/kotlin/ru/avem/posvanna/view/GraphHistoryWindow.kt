@@ -332,13 +332,14 @@ class GraphHistoryWindow : View("История графика") {
                     ProtocolSingle.new {
                         date = dateFormatter.format(unixTime).toString()
                         time = timeFormatter.format(unixTime).toString()
+                        section = comboBoxTestItem.selectedItem.toString()
                         temp = listOfValues.toString()
                     }
                 }
 
                 val files = chooseFile(
                     "Выберите директорию для сохранения",
-                    arrayOf(FileChooser.ExtensionFilter("XSLX Files (*.xlsx)", "*.xlsx")),
+                    arrayOf(FileChooser.ExtensionFilter("XLSX Files (*.xlsx)", "*.xlsx")),
                     FileChooserMode.Save,
                     this@GraphHistoryWindow.currentWindow
                 ) {

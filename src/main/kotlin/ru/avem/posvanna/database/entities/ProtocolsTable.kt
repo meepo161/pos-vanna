@@ -8,6 +8,13 @@ import org.jetbrains.exposed.dao.IntIdTable
 object ProtocolsTable : IntIdTable() {
     val date = varchar("date", 256)
     val time = varchar("time", 256)
+    val cipher1 = varchar("cipher1", 256)
+    val productName1 = varchar("productName1", 256)
+    val cipher2 = varchar("cipher2", 256)
+    val productName2 = varchar("productName2", 256)
+    val cipher3 = varchar("cipher3", 256)
+    val productName3 = varchar("productName3", 256)
+    val operator = varchar("operator", 256)
     val temp11 =  varchar("temp11", 99999999)
     val temp12 =  varchar("temp12", 99999999)
     val temp13 =  varchar("temp13", 99999999)
@@ -33,6 +40,13 @@ class Protocol(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Protocol>(ProtocolsTable)
     var date by ProtocolsTable.date
     var time by ProtocolsTable.time
+    var operator by ProtocolsTable.operator
+    var cipher1 by ProtocolsTable.cipher1
+    var productName1 by ProtocolsTable.productName1
+    var cipher2 by ProtocolsTable.cipher2
+    var productName2 by ProtocolsTable.productName2
+    var cipher3 by ProtocolsTable.cipher3
+    var productName3 by ProtocolsTable.productName3
     var temp11 by ProtocolsTable.temp11
     var temp12 by ProtocolsTable.temp12
     var temp13 by ProtocolsTable.temp13

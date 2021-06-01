@@ -11,7 +11,6 @@ import tornadofx.controlsfx.warningNotification
 class UserAddWindow : View("Добавить пользователя") {
     private val parentView: UserEditorWindow by inject()
 
-    private var textFieldLogin: TextField by singleAssign()
     private var textFieldPassword: TextField by singleAssign()
     private var textFieldFullName: TextField by singleAssign()
 
@@ -33,13 +32,13 @@ class UserAddWindow : View("Добавить пользователя") {
             }
 
             alignmentProperty().set(Pos.CENTER)
-
-            hbox(spacing = 25.0) {
+            hbox(spacing = 16.0) {
                 alignmentProperty().set(Pos.CENTER_RIGHT)
 
-                label("Логин")
-                textFieldLogin = textfield {
+                label("ФИО")
+                textFieldFullName = textfield {
                     prefWidth = 200.0
+
                     callKeyBoard()
 
                 }
@@ -57,43 +56,32 @@ class UserAddWindow : View("Добавить пользователя") {
                 }
             }
 
-            hbox(spacing = 16.0) {
-                alignmentProperty().set(Pos.CENTER_RIGHT)
-
-                label("ФИО")
-                textFieldFullName = textfield {
-                    prefWidth = 200.0
-
-                    callKeyBoard()
-
-                }
-            }
-
-
-
             button("Добавить") {
                 action {
-                    val userLogin = textFieldLogin.text
                     val userPassword = textFieldPassword.text
                     val fullName = textFieldFullName.text
 
-                    if (userLogin.isNullOrEmpty() or userPassword.isNullOrEmpty() or fullName.isNullOrEmpty()) {
+                    if (userPassword.isNullOrEmpty() or fullName.isNullOrEmpty()) {
                         warningNotification(
                             "Заполнение полей",
                             "Заполните все поля и повторите снова.",
                             Pos.BOTTOM_CENTER
                         )
+                    } else if (fullName == "admin") {
+                        warningNotification(
+                            "Заполнение полей",
+                            "Нельзя создать admin",
+                            Pos.BOTTOM_CENTER
+                        )
                     } else {
                         transaction {
                             User.new {
-                                login = userLogin
                                 password = userPassword
                                 this.fullName = fullName
                             }
                         }
                         parentView.refreshUsersTable()
                         textFieldFullName.clear()
-                        textFieldLogin.clear()
                         textFieldPassword.clear()
                         this@UserAddWindow.close()
                     }

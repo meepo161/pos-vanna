@@ -11,12 +11,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.posvanna.controllers.MainViewController
 import ru.avem.posvanna.database.entities.User
 import ru.avem.posvanna.database.entities.Users
-import ru.avem.posvanna.database.entities.Users.login
+import ru.avem.posvanna.database.entities.Users.fullName
 import tornadofx.*
 import tornadofx.controlsfx.confirmNotification
 import tornadofx.controlsfx.warningNotification
 import java.awt.Desktop
 import java.nio.file.Paths
+import kotlin.system.exitProcess
 
 class AuthorizationView : View("Авторизация") {
     private var loginProperty = SimpleStringProperty("")
@@ -54,25 +55,19 @@ class AuthorizationView : View("Авторизация") {
 
             alignmentProperty().set(Pos.CENTER)
 
-            label("Авторизация") {}
-
             hbox(spacing = 24.0) {
                 alignmentProperty().set(Pos.CENTER)
-
-                label("ФИО   ") {
-                }
                 comboboxUser = combobox {
+                    alignment = Pos.CENTER
+                    promptText = "ФИО"
                     prefWidth = 400.0
                 }
             }
 
             hbox(spacing = 16.0) {
                 alignmentProperty().set(Pos.CENTER)
-
-                label("Пароль") {
-                }
-
                 passwordfield {
+                    alignment = Pos.CENTER
                     prefWidth = 400.0
 
                     onTouchReleased = EventHandler {
@@ -93,7 +88,7 @@ class AuthorizationView : View("Авторизация") {
                 }
 
                 onAction = EventHandler {
-                    loginProperty = SimpleStringProperty(comboboxUser.selectedItem?.login)
+                    loginProperty = SimpleStringProperty(comboboxUser.selectedItem?.fullName)
                     if (loginProperty.value.isNullOrEmpty() || passwordProperty.value.isNullOrEmpty()) {
                         warningNotification(
                             "Пустой логин или пароль",
@@ -105,7 +100,7 @@ class AuthorizationView : View("Авторизация") {
                     }
                     transaction {
                         users = User.find {
-                            (login eq loginProperty.value) and (Users.password eq passwordProperty.value)
+                            (fullName eq loginProperty.value) and (Users.password eq passwordProperty.value)
                         }.toList()
                         if (users.isEmpty()) {
                             warningNotification(
@@ -123,7 +118,13 @@ class AuthorizationView : View("Авторизация") {
                         }
                     }
                 }
-            }
+            }.addClass(Styles.authorization)
+
+            button("Выход") {
+                action {
+                    exitProcess(0)
+                }
+            }.addClass(Styles.authorization)
         }
     }.addClass(Styles.hard, Styles.blueTheme)
 }

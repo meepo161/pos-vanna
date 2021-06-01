@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import ru.avem.posvanna.database.entities.User
 import ru.avem.posvanna.database.entities.Users
-import ru.avem.posvanna.database.entities.Users.login
+import ru.avem.posvanna.database.entities.Users.fullName
 import tornadofx.*
 import tornadofx.controlsfx.warningNotification
 
@@ -51,29 +51,29 @@ class UserEditorWindow : View("Редактор пользователей") {
 
                 items = getUsers()
 
-                column("Логин", User::login)
-                column("Пароль", User::password) {
-                    onEditCommit = EventHandler { cell ->
-                        transaction {
-                            Users.update({
-                                login eq selectedItem!!.login
-                            }) {
-                                it[password] = cell.newValue
-                            }
-                        }
-                    }
-                }
                 column("ФИО", User::fullName) {
                     onEditCommit = EventHandler { cell ->
                         transaction {
                             Users.update({
-                                login eq selectedItem!!.login
+                                fullName eq selectedItem!!.fullName
                             }) {
                                 it[fullName] = cell.newValue
                             }
                         }
                     }
-                }.makeEditable()
+                }
+
+//                column("Пароль", User::password) {
+//                    onEditCommit = EventHandler { cell ->
+//                        transaction {
+//                            Users.update({
+//                                fullName eq selectedItem!!.fullName
+//                            }) {
+//                                it[password] = cell.newValue
+//                            }
+//                        }
+//                    }
+//                }
             }
 
             vbox(spacing = 16.0) {
@@ -94,7 +94,7 @@ class UserEditorWindow : View("Редактор пользователей") {
                     action {
                         val item = tableViewUsers.selectedItem
                         if (item != null) {
-                            if (item.login == "admin") {
+                            if (item.fullName == "admin") {
                                 warningNotification(
                                     "Удаление пользователя",
                                     "Нельзя удалить учетную запись администратора.",
@@ -102,14 +102,14 @@ class UserEditorWindow : View("Редактор пользователей") {
                                 )
                             } else {
                                 confirm(
-                                    "Удаление пользователя ${item.login}",
+                                    "Удаление пользователя ${item.fullName}",
                                     "Вы действительно хотите удалить пользователя?",
                                     ButtonType.YES, ButtonType.NO,
                                     owner = this@UserEditorWindow.currentWindow,
-                                    title = "Удаление пользователя ${item.login}"
+                                    title = "Удаление пользователя ${item.fullName}"
                                 ) {
                                     transaction {
-                                        Users.deleteWhere { login eq item.login }
+                                        Users.deleteWhere { fullName eq item.fullName }
                                     }
                                     refreshUsersTable()
                                 }

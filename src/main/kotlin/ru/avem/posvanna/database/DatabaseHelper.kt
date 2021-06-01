@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.posvanna.database.entities.*
-import ru.avem.posvanna.database.entities.Users.login
+import ru.avem.posvanna.database.entities.Users.fullName
 import java.sql.Connection
 
 fun validateDB() {
@@ -13,18 +13,17 @@ fun validateDB() {
     TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
 
     transaction {
-        SchemaUtils.create(Users, ProtocolsTable, ProtocolsSingleTable, ObjectsTypes)
+        SchemaUtils.create(Users, ProtocolsTable, ProtocolsSingleTable, ProtocolsRotorBladeTable, ObjectsTypes)
     }
 
     transaction {
         if (User.all().count() < 2) {
             val admin = User.find {
-                login eq "admin"
+                fullName eq "admin"
             }
 
             if (admin.empty()) {
                 User.new {
-                    login = "admin"
                     password = "avem"
                     fullName = "admin"
                 }
@@ -40,52 +39,66 @@ fun validateDB() {
                     timeOff = "0.5"
                 }
 
-                TestObjectsType.new {
-                    serialNumber = "222222"
-                    resistanceCoil = "1.1"
-                    resistanceContactGroup = "1.2"
-                    voltageMin = "1.3"
-                    voltageMax = "1.4"
-                    timeOff = "1.5"
-                }
-
-                TestObjectsType.new {
-                    serialNumber = "3333333"
-                    resistanceCoil = "2.1"
-                    resistanceContactGroup = "2.2"
-                    voltageMin = "2.3"
-                    voltageMax = "2.4"
-                    timeOff = "2.5"
-                }
-
                 ProtocolSingle.new {
                     date = "10.03.2020"
                     time = "11:30:00"
+                    section = "1 лопасть 1 секция"
                     temp = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
+                }
+
+                ProtocolRotorBlade.new {
+                    date = "10.03.2020"
+                    time = "11:30:00"
+                    cipher = "#666"
+                    productName = "123456789"
+                    operator = "Иванов И.И."
+                    temp1 = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
+                    temp2 = "[1,0, 2,0, 3,0, 4,0, 5,0, 6,0, 7,0, 8,0, 9,0, 10,0, 11,0, 12,0]"
+                    temp3 = "[0,1, 0,2, 0,4, 0,8, 1,6, 3,2, 6,4, 12,8, 25,6, 51,2, 102,4, 204,8]"
+                    temp4 = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
+                    temp5 = "[1,0, 2,0, 3,0, 4,0, 5,0, 6,0, 7,0, 8,0, 9,0, 10,0, 11,0, 12,0]"
+                    temp6 = "[0,1, 0,2, 0,4, 0,8, 1,6, 3,2, 6,4, 12,8, 25,6, 51,2, 102,4, 204,8]"
                 }
 
                 Protocol.new {
                     date = "10.03.2020"
                     time = "11:30:00"
-                    temp11 = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
-                    temp12 = "[1,0, 2,0, 3,0, 4,0, 5,0, 6,0, 7,0, 8,0, 9,0, 10,0, 11,0, 12,0]"
-                    temp13 = "[0,1, 0,2, 0,4, 0,8, 1,6, 3,2, 6,4, 12,8, 25,6, 51,2, 102,4, 204,8]"
-                    temp14 = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
-                    temp15 = "[1,0, 2,0, 3,0, 4,0, 5,0, 6,0, 7,0, 8,0, 9,0, 10,0, 11,0, 12,0]"
-                    temp16 = "[0,1, 0,2, 0,4, 0,8, 1,6, 3,2, 6,4, 12,8, 25,6, 51,2, 102,4, 204,8]"
-                    temp17 = "[204,8, 102,4, 51,2, 25,6, 12,8, 6,4, 3,2, 1,6, 0,8, 0,4, 0,2, 0,1]"
-                    temp21 = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
-                    temp22 = "[1,0, 2,0, 3,0, 4,0, 5,0, 6,0, 7,0, 8,0, 9,0, 10,0, 11,0, 12,0]"
-                    temp23 = "[0,1, 0,2, 0,4, 0,8, 1,6, 3,2, 6,4, 12,8, 25,6, 51,2, 102,4, 204,8]"
-                    temp24 = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
-                    temp25 = "[1,0, 2,0, 3,0, 4,0, 5,0, 6,0, 7,0, 8,0, 9,0, 10,0, 11,0, 12,0]"
-                    temp26 = "[0,1, 0,2, 0,4, 0,8, 1,6, 3,2, 6,4, 12,8, 25,6, 51,2, 102,4, 204,8]"
-                    temp31 = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
-                    temp32 = "[1,0, 2,0, 3,0, 4,0, 5,0, 6,0, 7,0, 8,0, 9,0, 10,0, 11,0, 12,0]"
-                    temp33 = "[0,1, 0,2, 0,4, 0,8, 1,6, 3,2, 6,4, 12,8, 25,6, 51,2, 102,4, 204,8]"
-                    temp34 = "[1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0, 1,0]"
-                    temp35 = "[1,0, 2,0, 3,0, 4,0, 5,0, 6,0, 7,0, 8,0, 9,0, 10,0, 11,0, 12,0]"
-                    temp36 = "[0,1, 0,2, 0,4, 0,8, 1,6, 3,2, 6,4, 12,8, 25,6, 51,2, 102,4, 204,8]"
+                    cipher1 = "#111"
+                    productName1 = "1111111111"
+                    cipher2 = "#222"
+                    productName2 = "22222222"
+                    cipher3 = "#333"
+                    productName3 = "3333333333"
+                    operator = "Иванов И.И."
+
+                    val list1 = mutableListOf<String>()
+                    val list2 = mutableListOf<String>()
+                    val list3 = mutableListOf<String>()
+                    for (i in 0..10000) {
+                        list1.add("1")
+                        list2.add((i).toString())
+                        list3.add((i * i).toString())
+                    }
+
+                    temp11 = list1.toString()
+                    temp12 = list2.toString()
+                    temp13 = list3.toString()
+                    temp14 = list1.toString()
+                    temp15 = list2.toString()
+                    temp16 = list3.toString()
+                    temp17 = list1.toString()
+                    temp21 = list2.toString()
+                    temp22 = list3.toString()
+                    temp23 = list1.toString()
+                    temp24 = list2.toString()
+                    temp25 = list3.toString()
+                    temp26 = list1.toString()
+                    temp31 = list2.toString()
+                    temp32 = list3.toString()
+                    temp33 = list1.toString()
+                    temp34 = list2.toString()
+                    temp35 = list3.toString()
+                    temp36 = list1.toString()
                 }
             }
         }

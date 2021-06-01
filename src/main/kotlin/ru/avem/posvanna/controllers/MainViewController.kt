@@ -7,10 +7,7 @@ import ru.avem.posvanna.app.Pos.Companion.isAppRunning
 import ru.avem.posvanna.communication.model.CommunicationModel
 import ru.avem.posvanna.communication.model.devices.owen.pr.OwenPrModel
 import ru.avem.posvanna.entities.*
-import ru.avem.posvanna.utils.LogTag
-import ru.avem.posvanna.utils.State
-import ru.avem.posvanna.utils.Toast
-import ru.avem.posvanna.utils.sleep
+import ru.avem.posvanna.utils.*
 import ru.avem.posvanna.view.MainView
 import tornadofx.*
 import java.text.SimpleDateFormat
@@ -55,114 +52,114 @@ class MainViewController : Controller() {
 
     var tableValuesTest1 = observableListOf(
         TableValuesTest1(
-            SimpleStringProperty("1 секция"),
+            SimpleStringProperty("1"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest1(
-            SimpleStringProperty("2 секция"),
+            SimpleStringProperty("2"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest1(
-            SimpleStringProperty("3 секция"),
+            SimpleStringProperty("3"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest1(
-            SimpleStringProperty("4 секция"),
+            SimpleStringProperty("4"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest1(
-            SimpleStringProperty("5 секция"),
+            SimpleStringProperty("5"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest1(
-            SimpleStringProperty("6 секция"),
+            SimpleStringProperty("6"),
             SimpleStringProperty("0.0")
         )
     )
 
     var tableValuesTest2 = observableListOf(
         TableValuesTest2(
-            SimpleStringProperty("1 секция"),
+            SimpleStringProperty("1"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest2(
-            SimpleStringProperty("2 секция"),
+            SimpleStringProperty("2"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest2(
-            SimpleStringProperty("3 секция"),
+            SimpleStringProperty("3"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest2(
-            SimpleStringProperty("4 секция"),
+            SimpleStringProperty("4"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest2(
-            SimpleStringProperty("5 секция"),
+            SimpleStringProperty("5"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest2(
-            SimpleStringProperty("6 секция"),
+            SimpleStringProperty("6"),
             SimpleStringProperty("0.0")
         )
     )
     var tableValuesTest3 = observableListOf(
         TableValuesTest3(
-            SimpleStringProperty("1 секция"),
+            SimpleStringProperty("1"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest3(
-            SimpleStringProperty("2 секция"),
+            SimpleStringProperty("2"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest3(
-            SimpleStringProperty("3 секция"),
+            SimpleStringProperty("3"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest3(
-            SimpleStringProperty("4 секция"),
+            SimpleStringProperty("4"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest3(
-            SimpleStringProperty("5 секция"),
+            SimpleStringProperty("5"),
             SimpleStringProperty("0.0")
         ),
         TableValuesTest3(
-            SimpleStringProperty("6 секция"),
+            SimpleStringProperty("6"),
             SimpleStringProperty("0.0")
         )
     )
 
     var tableValuesTestTime = observableList(
         TableValuesTestTime(
-            SimpleStringProperty("1 секция"),
-            SimpleStringProperty("1.0"),
-            SimpleStringProperty("2.0")
+            SimpleStringProperty("1"),
+            SimpleStringProperty("4.0")
         ),
         TableValuesTestTime(
-            SimpleStringProperty("2 секция"),
-            SimpleStringProperty("1.0"),
-            SimpleStringProperty("2.0")
+            SimpleStringProperty("2"),
+            SimpleStringProperty("4.0")
         ),
         TableValuesTestTime(
-            SimpleStringProperty("3 секция"),
-            SimpleStringProperty("1.0"),
-            SimpleStringProperty("2.0")
+            SimpleStringProperty("3"),
+            SimpleStringProperty("4.0")
         ),
         TableValuesTestTime(
-            SimpleStringProperty("4 секция"),
-            SimpleStringProperty("1.0"),
-            SimpleStringProperty("2.0")
+            SimpleStringProperty("4"),
+            SimpleStringProperty("4.0")
         ),
         TableValuesTestTime(
-            SimpleStringProperty("5 секция"),
-            SimpleStringProperty("1.0"),
-            SimpleStringProperty("2.0")
+            SimpleStringProperty("5"),
+            SimpleStringProperty("4.0")
         ),
         TableValuesTestTime(
-            SimpleStringProperty("6 секция"),
-            SimpleStringProperty("1.0"),
-            SimpleStringProperty("2.0")
+            SimpleStringProperty("6"),
+            SimpleStringProperty("4.0")
+        )
+    )
+
+    var tableValuesTestTimePause = observableList(
+        TableValuesTestTimePause(
+            SimpleStringProperty("150.0")
         )
     )
 
@@ -248,7 +245,17 @@ class MainViewController : Controller() {
     }
 
     fun handleStopTest() {
-        cause = "Отменено оператором"
+        view.currentWindow?.let {
+            showTwoWayDialog(
+                "Отмена",
+                "Вы действительно хотите отменить испытание?",
+                "Нет",
+                "Да",
+                {  },
+                { cause = "Отменено оператором" },
+                currentWindow = it
+            )
+        }
     }
 
     private fun appendMessageToLog(tag: LogTag, _msg: String) {
@@ -273,7 +280,7 @@ class MainViewController : Controller() {
     }
 
     fun showAboutUs() {
-        Toast.makeText("Версия ПО: 1.0.0\nВерсия БСУ: 1.0.0\nДата: 09.02.2021").show(Toast.ToastType.INFORMATION)
+        Toast.makeText("Версия ПО: 2.0.4\nВерсия БСУ: 1.0.0\nДата: 01.06.2021").show(Toast.ToastType.INFORMATION)
     }
 
 
