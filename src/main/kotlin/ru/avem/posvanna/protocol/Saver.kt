@@ -482,58 +482,58 @@ private fun drawLineChart18(workbook: XSSFWorkbook) {
     val graphHeight = 20
     val graphSpace = graphHeight + 2
     val lineChart11 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart11, timeData11, valueData11, "1 лопасть 1 секция")
+    drawLineChart18(lineChart11, timeData11, valueData11, "1 лопасть 1 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart12 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart12, timeData11, valueData12, "1 лопасть 2 секция")
+    drawLineChart18(lineChart12, timeData11, valueData12, "1 лопасть 2 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart13 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart13, timeData11, valueData13, "1 лопасть 3 секция")
+    drawLineChart18(lineChart13, timeData11, valueData13, "1 лопасть 3 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart14 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart14, timeData11, valueData14, "1 лопасть 4 секция")
+    drawLineChart18(lineChart14, timeData11, valueData14, "1 лопасть 4 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart15 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart15, timeData11, valueData15, "1 лопасть 5 секция")
+    drawLineChart18(lineChart15, timeData11, valueData15, "1 лопасть 5 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart16 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart16, timeData11, valueData16, "1 лопасть 6 секция")
+    drawLineChart18(lineChart16, timeData11, valueData16, "1 лопасть 6 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart21 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart21, timeData11, valueData21, "2 лопасть 1 секция")
+    drawLineChart18(lineChart21, timeData11, valueData21, "2 лопасть 1 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart22 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart22, timeData11, valueData22, "2 лопасть 2 секция")
+    drawLineChart18(lineChart22, timeData11, valueData22, "2 лопасть 2 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart23 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart23, timeData11, valueData23, "2 лопасть 3 секция")
+    drawLineChart18(lineChart23, timeData11, valueData23, "2 лопасть 3 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart24 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart24, timeData11, valueData24, "2 лопасть 4 секция")
+    drawLineChart18(lineChart24, timeData11, valueData24, "2 лопасть 4 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart25 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart25, timeData11, valueData25, "2 лопасть 5 секция")
+    drawLineChart18(lineChart25, timeData11, valueData25, "2 лопасть 5 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart26 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart26, timeData11, valueData26, "2 лопасть 6 секция")
+    drawLineChart18(lineChart26, timeData11, valueData26, "2 лопасть 6 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart31 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart31, timeData11, valueData31, "3 лопасть 1 секция")
+    drawLineChart18(lineChart31, timeData11, valueData31, "3 лопасть 1 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart32 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart32, timeData11, valueData32, "3 лопасть 2 секция")
+    drawLineChart18(lineChart32, timeData11, valueData32, "3 лопасть 2 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart33 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart33, timeData11, valueData33, "3 лопасть 3 секция")
+    drawLineChart18(lineChart33, timeData11, valueData33, "3 лопасть 3 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart34 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart34, timeData11, valueData34, "3 лопасть 4 секция")
+    drawLineChart18(lineChart34, timeData11, valueData34, "3 лопасть 4 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart35 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart35, timeData11, valueData35, "3 лопасть 5 секция")
+    drawLineChart18(lineChart35, timeData11, valueData35, "3 лопасть 5 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart36 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart36, timeData11, valueData36, "3 лопасть 6 секция")
+    drawLineChart18(lineChart36, timeData11, valueData36, "3 лопасть 6 секция, сек")
     lastRowForGraph += graphSpace
     val lineChart17 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
     drawLineChart18(lineChart17, timeData11, valueData17, "Вода")
@@ -554,17 +554,17 @@ private fun drawLineChart6(workbook: XSSFWorkbook) {
     val valueData16 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
 
     val lineChart11 = createLineChart(sheet, 16, 26, 8, 38)
-    drawLineChart18(lineChart11, timeData11, valueData11, "1 секция")
+    drawLineChart18(lineChart11, timeData11, valueData11, "1 секция, сек")
     val lineChart12 = createLineChart(sheet, 27, 37, 8, 38)
-    drawLineChart18(lineChart12, timeData11, valueData12, "2 секция")
+    drawLineChart18(lineChart12, timeData11, valueData12, "2 секция, сек")
     val lineChart13 = createLineChart(sheet, 38, 48, 8, 38)
-    drawLineChart18(lineChart13, timeData11, valueData13, "3 секция")
+    drawLineChart18(lineChart13, timeData11, valueData13, "3 секция, сек")
     val lineChart14 = createLineChart(sheet, 49, 59, 8, 38)
-    drawLineChart18(lineChart14, timeData11, valueData14, "4 секция")
+    drawLineChart18(lineChart14, timeData11, valueData14, "4 секция, сек")
     val lineChart15 = createLineChart(sheet, 60, 70, 8, 38)
-    drawLineChart18(lineChart15, timeData11, valueData15, "5 секция")
+    drawLineChart18(lineChart15, timeData11, valueData15, "5 секция, сек")
     val lineChart16 = createLineChart(sheet, 72, 82, 8, 38)
-    drawLineChart18(lineChart16, timeData11, valueData16, "6 секция")
+    drawLineChart18(lineChart16, timeData11, valueData16, "6 секция, сек")
 }
 
 private fun drawLineChart18(

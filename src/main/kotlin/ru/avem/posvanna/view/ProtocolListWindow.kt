@@ -14,6 +14,7 @@ import ru.avem.posvanna.database.entities.ProtocolRotorBlade
 import ru.avem.posvanna.database.entities.ProtocolsTable
 import ru.avem.posvanna.protocol.saveProtocolAsWorkbook
 import ru.avem.posvanna.utils.Singleton
+import ru.avem.posvanna.utils.Toast
 import ru.avem.posvanna.utils.callKeyBoard
 import ru.avem.posvanna.utils.openFile
 import tornadofx.*
@@ -104,8 +105,8 @@ class ProtocolListWindow : View("Протоколы графиков") {
                             }.first()
                             saveProtocolAsWorkbook(Singleton.currentProtocol)
                             close()
-                            Desktop.getDesktop().print(File("protocol.xlsx"))
 //                            openFile(File("protocol.xlsx"))
+                            Desktop.getDesktop().print(File("protocol.xlsx"))
                         }
                     }
                 }
@@ -153,17 +154,17 @@ class ProtocolListWindow : View("Протоколы графиков") {
                         }
                     }
                 }
-                button("Сохранить 1 лопасть") {
+                button("Печать 1 лопасть") {
                     action {
                         saveRotorBlade(1)
                     }
                 }
-                button("Сохранить 2 лопасть") {
+                button("Печать 2 лопасть") {
                     action {
                         saveRotorBlade(2)
                     }
                 }
-                button("Сохранить 3 лопасть") {
+                button("Печать 3 лопасть") {
                     action {
                         saveRotorBlade(3)
                     }
@@ -215,16 +216,16 @@ class ProtocolListWindow : View("Протоколы графиков") {
 
     private fun saveRotorBlade(rotorBlade: Int) {
         if (tableViewProtocols.selectedItem != null) {
-            var protocol = tableViewProtocols.selectedItem!!
+            val protocol = tableViewProtocols.selectedItem!!
 
-            val files = chooseFile(
-                "Выберите директорию для сохранения",
-                arrayOf(FileChooser.ExtensionFilter("XLSX Files (*.xlsx)", "*.xlsx")),
-                FileChooserMode.Save,
-                this@ProtocolListWindow.currentWindow
-            ) {
-                this.initialDirectory = File(System.getProperty("user.home"))
-            }
+//            val files = chooseFile(
+//                "Выберите директорию для сохранения",
+//                arrayOf(FileChooser.ExtensionFilter("XLSX Files (*.xlsx)", "*.xlsx")),
+//                FileChooserMode.Save,
+//                this@ProtocolListWindow.currentWindow
+//            ) {
+//                this.initialDirectory = File(System.getProperty("user.home"))
+//            }
 
             when (rotorBlade) {
                 1 -> {
@@ -243,7 +244,8 @@ class ProtocolListWindow : View("Протоколы графиков") {
                             temp6 = protocol.temp16
                         }
                     }
-                    saveProtocolAsWorkbook(protocolRotorBlade, files.first().absolutePath)
+                    saveProtocolAsWorkbook(protocolRotorBlade)
+                    Desktop.getDesktop().print(File("protocol1RotorBlade.xlsx"))
                 }
                 2 -> {
                     val protocolRotorBlade = transaction {
@@ -261,8 +263,8 @@ class ProtocolListWindow : View("Протоколы графиков") {
                             temp6 = protocol.temp26
                         }
                     }
-                    saveProtocolAsWorkbook(protocolRotorBlade, files.first().absolutePath)
-
+                    saveProtocolAsWorkbook(protocolRotorBlade)
+                    Desktop.getDesktop().print(File("protocol1RotorBlade.xlsx"))
                 }
                 3 -> {
                     val protocolRotorBlade = transaction {
@@ -280,18 +282,14 @@ class ProtocolListWindow : View("Протоколы графиков") {
                             temp6 = protocol.temp36
                         }
                     }
-                    saveProtocolAsWorkbook(protocolRotorBlade, files.first().absolutePath)
+                    saveProtocolAsWorkbook(protocolRotorBlade)
+                    Desktop.getDesktop().print(File("protocol1RotorBlade.xlsx"))
 
                 }
             }
 
-            Platform.runLater {
-                confirmNotification(
-                    "Готово",
-                    "Успешно сохранено",
-                    Pos.BOTTOM_CENTER,
-                    owner = this@ProtocolListWindow.currentWindow
-                )
+            runLater {
+                Toast.makeText("Началась печать протокола").show(Toast.ToastType.INFORMATION)
             }
         } else {
             runLater {

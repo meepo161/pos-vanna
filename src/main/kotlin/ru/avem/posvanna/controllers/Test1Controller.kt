@@ -9,6 +9,7 @@ import ru.avem.posvanna.communication.model.devices.owen.pr.OwenPrModel
 import ru.avem.posvanna.communication.model.devices.owen.trm136.Trm136Model
 import ru.avem.posvanna.communication.model.devices.parma.ParmaModel
 import ru.avem.posvanna.database.entities.Protocol
+import ru.avem.posvanna.database.entities.ProtocolRotorBlade
 import ru.avem.posvanna.protocol.saveProtocolAsWorkbook
 import ru.avem.posvanna.utils.*
 import ru.avem.posvanna.view.MainView
@@ -1017,7 +1018,7 @@ class Test1Controller : TestController() {
             appendMessageToLog(LogTag.MESSAGE, "Испытание завершено")
             setResult()
 
-            soundWarning(3, 1000)
+            soundWarning(2, 1000)
 
             finalizeExperiment()
 
@@ -1034,8 +1035,71 @@ class Test1Controller : TestController() {
                         owner = mainView.currentWindow,
                         title = "Печать"
                     ) {
-                        saveProtocolAsWorkbook(Singleton.currentProtocol)
-                        Desktop.getDesktop().print(File("protocol.xlsx"))
+                        if (mainView.checkBoxTest1.isSelected && mainView.checkBoxTest2.isSelected && mainView.checkBoxTest3.isSelected) {
+                            saveProtocolAsWorkbook(Singleton.currentProtocol)
+                            Desktop.getDesktop().print(File("protocol.xlsx"))
+                        } else {
+                            var protocol = Singleton.currentProtocol
+                            if (mainView.checkBoxTest1.isSelected) {
+                                val protocolRotorBlade = transaction {
+                                    ProtocolRotorBlade.new {
+                                        date = protocol.date
+                                        time = protocol.time
+                                        cipher = protocol.cipher1
+                                        productName = protocol.productName1
+                                        operator = protocol.operator
+                                        temp1 = protocol.temp11
+                                        temp2 = protocol.temp12
+                                        temp3 = protocol.temp13
+                                        temp4 = protocol.temp14
+                                        temp5 = protocol.temp15
+                                        temp6 = protocol.temp16
+                                    }
+                                }
+                                saveProtocolAsWorkbook(protocolRotorBlade)
+                                Desktop.getDesktop().print(File("protocol1RotorBlade.xlsx"))
+                            }
+                            if (mainView.checkBoxTest2.isSelected) {
+                                protocol = Singleton.currentProtocol
+                                val protocolRotorBlade = transaction {
+                                    ProtocolRotorBlade.new {
+                                        date = protocol.date
+                                        time = protocol.time
+                                        cipher = protocol.cipher2
+                                        productName = protocol.productName2
+                                        operator = protocol.operator
+                                        temp1 = protocol.temp21
+                                        temp2 = protocol.temp22
+                                        temp3 = protocol.temp23
+                                        temp4 = protocol.temp24
+                                        temp5 = protocol.temp25
+                                        temp6 = protocol.temp26
+                                    }
+                                }
+                                saveProtocolAsWorkbook(protocolRotorBlade)
+                                Desktop.getDesktop().print(File("protocol1RotorBlade.xlsx"))
+                            }
+                            if (mainView.checkBoxTest3.isSelected) {
+                                protocol = Singleton.currentProtocol
+                                val protocolRotorBlade = transaction {
+                                    ProtocolRotorBlade.new {
+                                        date = protocol.date
+                                        time = protocol.time
+                                        cipher = protocol.cipher3
+                                        productName = protocol.productName3
+                                        operator = protocol.operator
+                                        temp1 = protocol.temp31
+                                        temp2 = protocol.temp32
+                                        temp3 = protocol.temp33
+                                        temp4 = protocol.temp34
+                                        temp5 = protocol.temp35
+                                        temp6 = protocol.temp36
+                                    }
+                                }
+                                saveProtocolAsWorkbook(protocolRotorBlade)
+                                Desktop.getDesktop().print(File("protocol1RotorBlade.xlsx"))
+                            }
+                        }
                     }
                 }
             }
@@ -1044,7 +1108,7 @@ class Test1Controller : TestController() {
 
     private fun soundWarning(times: Int, sleep: Long) {
         thread(isDaemon = true) {
-            for (i in 0..times) {
+            for (i in 0 until times) {
                 owenPR.onSound()
                 sleep(sleep)
                 owenPR.offSound()

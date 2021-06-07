@@ -4,9 +4,6 @@ import ru.avem.kserialpooler.communication.adapters.modbusrtu.ModbusRTUAdapter
 import ru.avem.kserialpooler.communication.adapters.utils.ModbusRegister
 import ru.avem.posvanna.communication.model.DeviceRegister
 import ru.avem.posvanna.communication.model.IDeviceController
-import ru.avem.posvanna.communication.utils.TransportException
-import ru.avem.posvanna.communication.utils.TypeByteOrder
-import ru.avem.posvanna.communication.utils.allocateOrderedByteBuffer
 import ru.avem.posvanna.utils.sleep
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
