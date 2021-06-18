@@ -10,6 +10,7 @@ import ru.avem.posvanna.communication.model.devices.owen.trm136.Trm136Model
 import ru.avem.posvanna.communication.model.devices.parma.ParmaModel
 import ru.avem.posvanna.database.entities.Protocol
 import ru.avem.posvanna.database.entities.ProtocolRotorBlade
+import ru.avem.posvanna.database.entities.ProtocolVars
 import ru.avem.posvanna.protocol.saveProtocolAsWorkbook
 import ru.avem.posvanna.utils.*
 import ru.avem.posvanna.view.MainView
@@ -212,6 +213,8 @@ class Test1Controller : TestController() {
 
     var isClicked = false
 
+    var unixTimeStart = 0L
+
     private fun appendOneMessageToLog(tag: LogTag, message: String) {
         if (logBuffer == null || logBuffer != message) {
             logBuffer = message
@@ -359,6 +362,7 @@ class Test1Controller : TestController() {
             isExperimentEnded = false
             isClicked = false
             appendMessageToLog(LogTag.DEBUG, "Начало испытания")
+            unixTimeStart = System.currentTimeMillis()
             sleep(1000)
 
             runLater {
@@ -1045,6 +1049,8 @@ class Test1Controller : TestController() {
                                     ProtocolRotorBlade.new {
                                         date = protocol.date
                                         time = protocol.time
+                                        dateEnd = protocol.dateEnd
+                                        timeEnd = protocol.timeEnd
                                         cipher = protocol.cipher1
                                         productName = protocol.productName1
                                         operator = protocol.operator
@@ -1054,6 +1060,15 @@ class Test1Controller : TestController() {
                                         temp4 = protocol.temp14
                                         temp5 = protocol.temp15
                                         temp6 = protocol.temp16
+                                        NUMBER_DATE_ATTESTATION = protocol.NUMBER_DATE_ATTESTATION
+                                        NAME_OF_OPERATION = protocol.NAME_OF_OPERATION
+                                        NUMBER_CONTROLLER = protocol.NUMBER_CONTROLLER
+                                        T1 = protocol.T1
+                                        T2 = protocol.T2
+                                        T3 = protocol.T3
+                                        T4 = protocol.T4
+                                        T5 = protocol.T5
+                                        T6 = protocol.T6
                                     }
                                 }
                                 saveProtocolAsWorkbook(protocolRotorBlade)
@@ -1065,6 +1080,8 @@ class Test1Controller : TestController() {
                                     ProtocolRotorBlade.new {
                                         date = protocol.date
                                         time = protocol.time
+                                        dateEnd = protocol.dateEnd
+                                        timeEnd = protocol.timeEnd
                                         cipher = protocol.cipher2
                                         productName = protocol.productName2
                                         operator = protocol.operator
@@ -1074,6 +1091,15 @@ class Test1Controller : TestController() {
                                         temp4 = protocol.temp24
                                         temp5 = protocol.temp25
                                         temp6 = protocol.temp26
+                                        NUMBER_DATE_ATTESTATION = protocol.NUMBER_DATE_ATTESTATION
+                                        NAME_OF_OPERATION = protocol.NAME_OF_OPERATION
+                                        NUMBER_CONTROLLER = protocol.NUMBER_CONTROLLER
+                                        T1 = protocol.T7
+                                        T2 = protocol.T8
+                                        T3 = protocol.T9
+                                        T4 = protocol.T10
+                                        T5 = protocol.T11
+                                        T6 = protocol.T12
                                     }
                                 }
                                 saveProtocolAsWorkbook(protocolRotorBlade)
@@ -1085,6 +1111,8 @@ class Test1Controller : TestController() {
                                     ProtocolRotorBlade.new {
                                         date = protocol.date
                                         time = protocol.time
+                                        dateEnd = protocol.dateEnd
+                                        timeEnd = protocol.timeEnd
                                         cipher = protocol.cipher3
                                         productName = protocol.productName3
                                         operator = protocol.operator
@@ -1094,6 +1122,15 @@ class Test1Controller : TestController() {
                                         temp4 = protocol.temp34
                                         temp5 = protocol.temp35
                                         temp6 = protocol.temp36
+                                        NUMBER_DATE_ATTESTATION = protocol.NUMBER_DATE_ATTESTATION
+                                        NAME_OF_OPERATION = protocol.NAME_OF_OPERATION
+                                        NUMBER_CONTROLLER = protocol.NUMBER_CONTROLLER
+                                        T1 = protocol.T13
+                                        T2 = protocol.T14
+                                        T3 = protocol.T15
+                                        T4 = protocol.T16
+                                        T5 = protocol.T17
+                                        T6 = protocol.T18
                                     }
                                 }
                                 saveProtocolAsWorkbook(protocolRotorBlade)
@@ -1120,26 +1157,31 @@ class Test1Controller : TestController() {
     private fun saveProtocolToDB() {
         val dateFormatter = SimpleDateFormat("dd.MM.y")
         val timeFormatter = SimpleDateFormat("HH:mm:ss")
-        val unixTime = System.currentTimeMillis()
+        val unixTimeEnd = System.currentTimeMillis()
+
+        val protocolVars = transaction {
+            ProtocolVars.all().toList().asObservable()
+        }.first()
 
         transaction {
             Protocol.new {
-                date = dateFormatter.format(unixTime).toString()
-                time = timeFormatter.format(unixTime).toString()
+                date = dateFormatter.format(unixTimeStart).toString()
+                time = timeFormatter.format(unixTimeStart).toString()
+                dateEnd = dateFormatter.format(unixTimeEnd).toString()
+                timeEnd = timeFormatter.format(unixTimeEnd).toString()
+                operator = controller.position1
                 cipher1 = mainView.tfCipher1.text.toString()
                 productName1 = mainView.tfProductNumber1.text.toString()
-                cipher2 = mainView.tfCipher2.text.toString()
-                productName2 = mainView.tfProductNumber2.text.toString()
+                cipher2 = mainView.tfCipher3.text.toString()
+                productName2 = mainView.tfProductNumber3.text.toString()
                 cipher3 = mainView.tfCipher3.text.toString()
                 productName3 = mainView.tfProductNumber3.text.toString()
-                operator = controller.position1
                 temp11 = listOfValues11.toString()
                 temp12 = listOfValues12.toString()
                 temp13 = listOfValues13.toString()
                 temp14 = listOfValues14.toString()
                 temp15 = listOfValues15.toString()
                 temp16 = listOfValues16.toString()
-                temp17 = listOfValues17.toString()
                 temp21 = listOfValues21.toString()
                 temp22 = listOfValues22.toString()
                 temp23 = listOfValues23.toString()
@@ -1152,6 +1194,28 @@ class Test1Controller : TestController() {
                 temp34 = listOfValues34.toString()
                 temp35 = listOfValues35.toString()
                 temp36 = listOfValues36.toString()
+                NUMBER_DATE_ATTESTATION = protocolVars.NUMBER_DATE_ATTESTATION
+                NAME_OF_OPERATION = protocolVars.NAME_OF_OPERATION
+                NUMBER_CONTROLLER = protocolVars.NUMBER_CONTROLLER
+                T1 = protocolVars.T1
+                T2 = protocolVars.T2
+                T3 = protocolVars.T3
+                T4 = protocolVars.T4
+                T5 = protocolVars.T5
+                T6 = protocolVars.T6
+                T7 = protocolVars.T7
+                T8 = protocolVars.T8
+                T9 = protocolVars.T9
+                T10 = protocolVars.T10
+                T11 = protocolVars.T11
+                T12 = protocolVars.T12
+                T13 = protocolVars.T13
+                T14 = protocolVars.T14
+                T15 = protocolVars.T15
+                T16 = protocolVars.T16
+                T17 = protocolVars.T17
+                T18 = protocolVars.T18
+
             }
         }
     }

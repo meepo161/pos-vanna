@@ -8,6 +8,8 @@ import org.jetbrains.exposed.dao.IntIdTable
 object ProtocolsTable : IntIdTable() {
     val date = varchar("date", 256)
     val time = varchar("time", 256)
+    val dateEnd = varchar("dateEnd", 256)
+    val timeEnd = varchar("timeEnd", 256)
     val cipher1 = varchar("cipher1", 256)
     val productName1 = varchar("productName1", 256)
     val cipher2 = varchar("cipher2", 256)
@@ -34,12 +36,36 @@ object ProtocolsTable : IntIdTable() {
     val temp34 =  varchar("temp34", 99999999)
     val temp35 =  varchar("temp35", 99999999)
     val temp36 =  varchar("temp36", 99999999)
+
+    var NUMBER_DATE_ATTESTATION = varchar("NUMBER_DATE_ATTESTATION", 512)
+    var NAME_OF_OPERATION = varchar("NAME_OF_OPERATION", 512)
+    var NUMBER_CONTROLLER = varchar("NUMBER_CONTROLLER", 512)
+    var T1 = varchar("T1", 512)
+    var T2 = varchar("T2", 512)
+    var T3 = varchar("T3", 512)
+    var T4 = varchar("T4", 512)
+    var T5 = varchar("T5", 512)
+    var T6 = varchar("T6", 512)
+    var T7 = varchar("T7", 512)
+    var T8 = varchar("T8", 512)
+    var T9 = varchar("T9", 512)
+    var T10 = varchar("T10", 512)
+    var T11 = varchar("T11", 512)
+    var T12 = varchar("T12", 512)
+    var T13 = varchar("T13", 512)
+    var T14 = varchar("T14", 512)
+    var T15 = varchar("T15", 512)
+    var T16 = varchar("T16", 512)
+    var T17 = varchar("T17", 512)
+    var T18 = varchar("T18", 512)
 }
 
 class Protocol(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Protocol>(ProtocolsTable)
     var date by ProtocolsTable.date
     var time by ProtocolsTable.time
+    var dateEnd by ProtocolsTable.dateEnd
+    var timeEnd by ProtocolsTable.timeEnd
     var operator by ProtocolsTable.operator
     var cipher1 by ProtocolsTable.cipher1
     var productName1 by ProtocolsTable.productName1
@@ -66,6 +92,27 @@ class Protocol(id: EntityID<Int>) : IntEntity(id) {
     var temp34 by ProtocolsTable.temp34
     var temp35 by ProtocolsTable.temp35
     var temp36 by ProtocolsTable.temp36
+    var NUMBER_DATE_ATTESTATION by ProtocolsTable.NUMBER_DATE_ATTESTATION
+    var NAME_OF_OPERATION by ProtocolsTable.NAME_OF_OPERATION
+    var NUMBER_CONTROLLER by ProtocolsTable.NUMBER_CONTROLLER
+    var T1 by ProtocolsTable.T1
+    var T2 by ProtocolsTable.T2
+    var T3 by ProtocolsTable.T3
+    var T4 by ProtocolsTable.T4
+    var T5 by ProtocolsTable.T5
+    var T6 by ProtocolsTable.T6
+    var T7 by ProtocolsTable.T7
+    var T8 by ProtocolsTable.T8
+    var T9 by ProtocolsTable.T9
+    var T10 by ProtocolsTable.T10
+    var T11 by ProtocolsTable.T11
+    var T12 by ProtocolsTable.T12
+    var T13 by ProtocolsTable.T13
+    var T14 by ProtocolsTable.T14
+    var T15 by ProtocolsTable.T15
+    var T16 by ProtocolsTable.T16
+    var T17 by ProtocolsTable.T17
+    var T18 by ProtocolsTable.T18
 
     override fun toString(): String {
         return "$id"

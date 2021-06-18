@@ -95,6 +95,16 @@ class MainView : View("Комплексный стенд для испытани
                     }
                 }
                 menu("База данных") {
+                    item("Переменные для протокола") {
+                        action {
+                            find<ProtocolVarsWindow>().openModal(
+                                modality = Modality.WINDOW_MODAL,
+                                escapeClosesWindow = true,
+                                resizable = false,
+                                owner = this@MainView.currentWindow
+                            )
+                        }
+                    }
                     item("Протоколы") {
                         action {
                             find<ProtocolListWindow>().openModal(
@@ -187,7 +197,7 @@ class MainView : View("Комплексный стенд для испытани
                                 column("Пауза, сек", TableValuesTestTimePause::pause.getter).makeEditable()
                             }
                         }
-                        vbox(spacing = 4.0) {
+                        vbox(spacing = 16.0) {
                             anchorpaneConstraints {
                                 leftAnchor = 16.0
                                 rightAnchor = 16.0
