@@ -6,14 +6,23 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.posvanna.database.entities.*
 import ru.avem.posvanna.database.entities.Users.fullName
+import ru.avem.posvanna.utils.formatRealNumber
 import java.sql.Connection
+import kotlin.random.Random
 
 fun validateDB() {
     Database.connect("jdbc:sqlite:data.db", "org.sqlite.JDBC")
     TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
 
     transaction {
-        SchemaUtils.create(Users, ProtocolsTable, ProtocolsSingleTable, ProtocolsRotorBladeTable, ObjectsTypes, ProtocolVarsTable)
+        SchemaUtils.create(
+            Users,
+            ProtocolsTable,
+            ProtocolsSingleTable,
+            ProtocolsRotorBladeTable,
+            ObjectsTypes,
+            ProtocolVarsTable
+        )
     }
 
     transaction {
@@ -53,7 +62,6 @@ fun validateDB() {
                     T17 = "17"
                     T18 = "18"
                 }
-
 
                 ProtocolSingle.new {
                     date = "10.03.2020"
@@ -104,11 +112,16 @@ fun validateDB() {
                     val list2 = mutableListOf<String>()
                     val list3 = mutableListOf<String>()
                     for (i in 0..10000) {
-                        list1.add("1")
-                        list2.add((i).toString())
-                        list3.add((i * i).toString())
+                        if (i < 5000) {
+                            list1.add(formatRealNumber(40 + i / 250.0).toString())
+                            list2.add(formatRealNumber(45 + i / 250.0).toString())
+                            list3.add(formatRealNumber(42 + i / 250.0).toString())
+                        } else {
+                            list1.add(formatRealNumber(60 + Random.nextDouble()).toString())
+                            list2.add(formatRealNumber(65 + Random.nextDouble()).toString())
+                            list3.add(formatRealNumber(62 + Random.nextDouble()).toString())
+                        }
                     }
-
                     temp11 = list1.toString()
                     temp12 = list2.toString()
                     temp13 = list3.toString()

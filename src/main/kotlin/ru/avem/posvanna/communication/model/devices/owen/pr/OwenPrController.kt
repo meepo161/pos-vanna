@@ -21,12 +21,13 @@ class OwenPrController(
     override var requestTotalCount = 0
     override var requestSuccessCount = 0
     override val pollingRegisters = mutableListOf<DeviceRegister>()
-    override val writingMutex = Any()
     override val writingRegisters = mutableListOf<Pair<DeviceRegister, Number>>()
-    override val pollingMutex = Any()
 
+    @Volatile
     var outMask: Short = 0
+    @Volatile
     var outMask2: Short = 0
+    @Volatile
     var outMask3: Short = 0
 
     companion object {
@@ -312,11 +313,11 @@ class OwenPrController(
     }
 
     fun offAllKMs() {
-        writeRegister(getRegisterById(OwenPrModel.KMS1_REGISTER), 0)
-        writeRegister(getRegisterById(OwenPrModel.KMS2_REGISTER), 0)
-        writeRegister(getRegisterById(OwenPrModel.KMS3_REGISTER), 0)
         outMask = 0
         outMask2 = 0
         outMask3 = 0
+        writeRegister(getRegisterById(OwenPrModel.KMS1_REGISTER), outMask)
+        writeRegister(getRegisterById(OwenPrModel.KMS2_REGISTER), outMask2)
+        writeRegister(getRegisterById(OwenPrModel.KMS3_REGISTER), outMask3)
     }
 }

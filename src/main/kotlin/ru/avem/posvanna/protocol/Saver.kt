@@ -28,11 +28,64 @@ fun saveProtocolAsWorkbook(protocol: Protocol, path: String = "protocol.xlsx") {
     copyFileFromStream(Pos::class.java.getResource("protocol.xlsx").openStream(), template)
     try {
         XSSFWorkbook(template).use { wb ->
-            val sheet = wb.getSheetAt(0)
+            var sheet = wb.getSheetAt(0)
             for (iRow in 0 until 100) {
                 val row = sheet.getRow(iRow)
                 if (row != null) {
                     for (iCell in 0 until 100) {
+                        val cell = row.getCell(iCell)
+                        if (cell != null && (cell.cellType == CellType.STRING)) {
+                            when (cell.stringCellValue) {
+                                "#PROTOCOL_NUMBER#" -> cell.setCellValue(protocol.id.toString())
+                                "#DATE#" -> cell.setCellValue(protocol.date)
+                                "#DATE_END#" -> cell.setCellValue(protocol.dateEnd)
+                                "#TIME#" -> cell.setCellValue(protocol.time)
+                                "#TIME_END#" -> cell.setCellValue(protocol.timeEnd)
+                                "#CIPHER1#" -> cell.setCellValue(protocol.cipher1)
+                                "#NUMBER_PRODUCT1#" -> cell.setCellValue(protocol.productName1)
+                                "#CIPHER2#" -> cell.setCellValue(protocol.cipher2)
+                                "#NUMBER_PRODUCT2#" -> cell.setCellValue(protocol.productName2)
+                                "#CIPHER3#" -> cell.setCellValue(protocol.cipher3)
+                                "#NUMBER_PRODUCT3#" -> cell.setCellValue(protocol.productName3)
+                                "#OPERATOR#" -> cell.setCellValue(protocol.operator)
+
+                                "#NUMBER_DATE_ATTESTATION#" -> cell.setCellValue(protocol.NUMBER_DATE_ATTESTATION)
+                                "#NAME_OF_OPERATION#" -> cell.setCellValue(protocol.NAME_OF_OPERATION)
+                                "#NUMBER_CONTROLLER#" -> cell.setCellValue(protocol.NUMBER_CONTROLLER)
+                                "#T1#" -> cell.setCellValue(protocol.T1)
+                                "#T2#" -> cell.setCellValue(protocol.T2)
+                                "#T3#" -> cell.setCellValue(protocol.T3)
+                                "#T4#" -> cell.setCellValue(protocol.T4)
+                                "#T5#" -> cell.setCellValue(protocol.T5)
+                                "#T6#" -> cell.setCellValue(protocol.T6)
+                                "#T7#" -> cell.setCellValue(protocol.T7)
+                                "#T8#" -> cell.setCellValue(protocol.T8)
+                                "#T9#" -> cell.setCellValue(protocol.T9)
+                                "#T10#" -> cell.setCellValue(protocol.T10)
+                                "#T11#" -> cell.setCellValue(protocol.T11)
+                                "#T12#" -> cell.setCellValue(protocol.T12)
+                                "#T13#" -> cell.setCellValue(protocol.T13)
+                                "#T14#" -> cell.setCellValue(protocol.T14)
+                                "#T15#" -> cell.setCellValue(protocol.T15)
+                                "#T16#" -> cell.setCellValue(protocol.T16)
+                                "#T17#" -> cell.setCellValue(protocol.T17)
+                                "#T18#" -> cell.setCellValue(protocol.T18)
+
+                                else -> {
+                                    if (cell.stringCellValue.contains("#")) {
+                                        cell.setCellValue("")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            sheet = wb.getSheetAt(1)
+            for (iRow in 0 until 1000) {
+                val row = sheet.getRow(iRow)
+                if (row != null) {
+                    for (iCell in 0 until 1000) {
                         val cell = row.getCell(iCell)
                         if (cell != null && (cell.cellType == CellType.STRING)) {
                             when (cell.stringCellValue) {
@@ -123,11 +176,46 @@ fun saveProtocolAsWorkbook(
     copyFileFromStream(Pos::class.java.getResource("protocol1RotorBlade.xlsx").openStream(), template)
     try {
         XSSFWorkbook(template).use { wb ->
-            val sheet = wb.getSheetAt(0)
+            var sheet = wb.getSheetAt(0)
             for (iRow in 0 until 100) {
                 val row = sheet.getRow(iRow)
                 if (row != null) {
                     for (iCell in 0 until 100) {
+                        val cell = row.getCell(iCell)
+                        if (cell != null && (cell.cellType == CellType.STRING)) {
+                            when (cell.stringCellValue) {
+                                "#PROTOCOL_NUMBER#" -> cell.setCellValue(protocolRotorBlade.id.toString())
+                                "#DATE#" -> cell.setCellValue(protocolRotorBlade.date)
+                                "#DATE_END#" -> cell.setCellValue(protocolRotorBlade.dateEnd)
+                                "#TIME#" -> cell.setCellValue(protocolRotorBlade.time)
+                                "#TIME_END#" -> cell.setCellValue(protocolRotorBlade.timeEnd)
+                                "#CIPHER#" -> cell.setCellValue(protocolRotorBlade.cipher)
+                                "#NUMBER_PRODUCT#" -> cell.setCellValue(protocolRotorBlade.productName)
+                                "#OPERATOR#" -> cell.setCellValue(protocolRotorBlade.operator)
+                                "#NUMBER_DATE_ATTESTATION#" -> cell.setCellValue(protocolRotorBlade.NUMBER_DATE_ATTESTATION)
+                                "#NAME_OF_OPERATION#" -> cell.setCellValue(protocolRotorBlade.NAME_OF_OPERATION)
+                                "#NUMBER_CONTROLLER#" -> cell.setCellValue(protocolRotorBlade.NUMBER_CONTROLLER)
+                                "#T1#" -> cell.setCellValue(protocolRotorBlade.T1)
+                                "#T2#" -> cell.setCellValue(protocolRotorBlade.T2)
+                                "#T3#" -> cell.setCellValue(protocolRotorBlade.T3)
+                                "#T4#" -> cell.setCellValue(protocolRotorBlade.T4)
+                                "#T5#" -> cell.setCellValue(protocolRotorBlade.T5)
+                                "#T6#" -> cell.setCellValue(protocolRotorBlade.T6)
+                                else -> {
+                                    if (cell.stringCellValue.contains("#")) {
+                                        cell.setCellValue("")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            sheet = wb.getSheetAt(1)
+            for (iRow in 0 until 1000) {
+                val row = sheet.getRow(iRow)
+                if (row != null) {
+                    for (iCell in 0 until 1000) {
                         val cell = row.getCell(iCell)
                         if (cell != null && (cell.cellType == CellType.STRING)) {
                             when (cell.stringCellValue) {
@@ -513,9 +601,9 @@ private fun drawLineChart18(workbook: XSSFWorkbook) {
     val valueData36 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
     val valueData17 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
 
-    var lastRowForGraph = 0
+    var lastRowForGraph = 1
     val graphHeight = 41
-    val graphSpace = graphHeight + 3
+    val graphSpace = graphHeight + 9
     val lineChart11 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
     drawLineChart18(lineChart11, timeData11, valueData11, "Время, мин.    1 лопасть 1 секция")
     lastRowForGraph += graphSpace
@@ -589,26 +677,26 @@ private fun drawLineChart6(workbook: XSSFWorkbook) {
     val valueData15 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
     val valueData16 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
 
-    var lastRowForGraph = 0
+    var lastRowForGraph = 1
     val graphHeight = 41
-    val graphSpace = graphHeight + 3
+    val graphSpace = graphHeight + 9
     val lineChart11 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart11, timeData11, valueData11, "1 секция, сек")
+    drawLineChart18(lineChart11, timeData11, valueData11, "1 секция, мин")
     lastRowForGraph += graphSpace
     val lineChart12 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart12, timeData11, valueData12, "2 секция, сек")
+    drawLineChart18(lineChart12, timeData11, valueData12, "2 секция, мин")
     lastRowForGraph += graphSpace
     val lineChart13 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart13, timeData11, valueData13, "3 секция, сек")
+    drawLineChart18(lineChart13, timeData11, valueData13, "3 секция, мин")
     lastRowForGraph += graphSpace
     val lineChart14 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart14, timeData11, valueData14, "4 секция, сек")
+    drawLineChart18(lineChart14, timeData11, valueData14, "4 секция, мин")
     lastRowForGraph += graphSpace
     val lineChart15 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart15, timeData11, valueData15, "5 секция, сек")
+    drawLineChart18(lineChart15, timeData11, valueData15, "5 секция, мин")
     lastRowForGraph += graphSpace
     val lineChart16 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
-    drawLineChart18(lineChart16, timeData11, valueData16, "6 секция, сек")
+    drawLineChart18(lineChart16, timeData11, valueData16, "6 секция, мин")
 }
 
 private fun drawLineChart18(
@@ -628,6 +716,7 @@ private fun drawLineChart18(
 
     lineChart.axes[0].setTitle(nameOfOI)
     lineChart.axes[1].setTitle("T, °C")
+    lineChart.axes[1].majorUnit = 2.0
 
     val plotArea = lineChart.ctChart.plotArea
     plotArea.lineChartArray[0].smooth

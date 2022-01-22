@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.text.Text
 import ru.avem.posvanna.app.Pos.Companion.isAppRunning
 import ru.avem.posvanna.communication.model.CommunicationModel
+import ru.avem.posvanna.communication.model.IDeviceController
 import ru.avem.posvanna.communication.model.devices.owen.pr.OwenPrModel
 import ru.avem.posvanna.entities.*
 import ru.avem.posvanna.utils.*
@@ -23,6 +24,7 @@ class MainViewController : Controller() {
     @Volatile
     var isExperimentRunning: Boolean = false
 
+    @Volatile
     var cause: String = ""
         set(value) {
             if (value != "") {
@@ -170,59 +172,51 @@ class MainViewController : Controller() {
     )
 
     init {
-        thread(isDaemon = true) {
-            runLater {
-                view.buttonStop.isDisable = true
-            }
-            while (isAppRunning) {
-                var register = CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2)
-                    .getRegisterById(OwenPrModel.INSTANT_STATES_REGISTER_1)
-                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).readRegister(register)
-                var doorZone1 = register.value.toShort() and 2 > 0
-
-                if (CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding) {
-                    runLater {
-                        view.comIndicate.fill = State.OK.c
-                    }
-                    if (doorZone1) {
-                        runLater {
-                            view.labelTestStatusEnd1.text = "Дверь открыта"
-                        }
-                    } else {
-                        runLater {
-                            view.labelTestStatusEnd1.text = ""
-                        }
-                    }
-                    if (!isExperimentRunning && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding && !doorZone1) {
-                        runLater {
-                            view.buttonStart.isDisable = false
-                        }
-                    } else if (!isExperimentRunning && (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding || doorZone1)) {
-                        runLater {
-                            view.buttonStart.isDisable = true
-                        }
-
-                    }
-                } else {
-                    runLater {
-                        cause = "Нет связи"
-                        view.comIndicate.fill = State.BAD.c
-                        view.labelTestStatusEnd1.text = "Нет связи со стендом. Проверьте подключение."
-                        view.buttonStart.isDisable = true
-                        view.buttonStop.isDisable = true
-                    }
-                }
-            }
-        }
-        sleep(1000)
-    }
-
-
-    fun isDevicesResponding(): Boolean {
-        return CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding &&
-                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM1).isResponding &&
-                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM2).isResponding &&
-                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM3).isResponding
+//        thread(isDaemon = true) {
+//            runLater {
+//                view.buttonStop.isDisable = true
+//            }
+//            while (isAppRunning) {
+//                var register = CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2)
+//                    .getRegisterById(OwenPrModel.INSTANT_STATES_REGISTER_1)
+//                CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).readRegister(register)
+//                var doorZone1 = register.value.toShort() and 2 > 0
+//
+//                if (CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding) {
+//                    runLater {
+//                        view.comIndicate.fill = State.OK.c
+//                    }
+//                    if (doorZone1) {
+//                        runLater {
+//                            view.labelTestStatusEnd1.text = "Дверь открыта"
+//                        }
+//                    } else {
+//                        runLater {
+//                            view.labelTestStatusEnd1.text = ""
+//                        }
+//                    }
+//                    if (!isExperimentRunning && CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding && !doorZone1) {
+//                        runLater {
+//                            view.buttonStart.isDisable = false
+//                        }
+//                    } else if (!isExperimentRunning && (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding || doorZone1)) {
+//                        runLater {
+//                            view.buttonStart.isDisable = true
+//                        }
+//
+//                    }
+//                } else {
+//                    runLater {
+//                        cause = "Нет связи"
+//                        view.comIndicate.fill = State.BAD.c
+//                        view.labelTestStatusEnd1.text = "Нет связи со стендом. Проверьте подключение."
+//                        view.buttonStart.isDisable = true
+//                        view.buttonStop.isDisable = true
+//                    }
+//                }
+//            }
+//        }
+//        sleep(1000)
     }
 
     @UseExperimental(ExperimentalTime::class)

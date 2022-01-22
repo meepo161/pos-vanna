@@ -63,6 +63,7 @@ class MainView : View("Комплексный стенд для испытани
 
 
     var textFieldMaxTemp: TextField by singleAssign()
+    var textFieldMaxCurrent: TextField by singleAssign()
 
     override fun onBeforeShow() {
         tableViewTest1.isDisable = true
@@ -339,6 +340,16 @@ class MainView : View("Комплексный стенд для испытани
                         vbox(spacing = 16.0) {
                             label("Макс. температура").addClass(Styles.maxTemp)
                             textFieldMaxTemp = textfield {
+                                text = "45"
+                                callKeyBoard()
+                                prefWidth = 100.0
+                                alignment = Pos.CENTER
+                            }.addClass(Styles.maxTemp)
+                        }
+                        vbox(spacing = 16.0) {
+                            label("Макс. ток").addClass(Styles.maxTemp)
+                            textFieldMaxCurrent = textfield {
+                                text = "29"
                                 callKeyBoard()
                                 prefWidth = 100.0
                                 alignment = Pos.CENTER
@@ -436,25 +447,25 @@ class MainView : View("Комплексный стенд для испытани
                 }
             }
         }
-        bottom = hbox(spacing = 32) {
-            alignment = Pos.CENTER_LEFT
-            comIndicate = circle(radius = 18) {
-                hboxConstraints {
-                    hGrow = Priority.ALWAYS
-                    marginLeft = 8.0
-                    marginBottom = 8.0
-                }
-                fill = c("cyan")
-                stroke = c("black")
-                isSmooth = true
-            }
-            label(" Связь со ПР") {
-                hboxConstraints {
-                    hGrow = Priority.ALWAYS
-                    marginBottom = 8.0
-                }
-            }
-        }
+//        bottom = hbox(spacing = 32) {
+//            alignment = Pos.CENTER_LEFT
+//            comIndicate = circle(radius = 18) {
+//                hboxConstraints {
+//                    hGrow = Priority.ALWAYS
+//                    marginLeft = 8.0
+//                    marginBottom = 8.0
+//                }
+//                fill = c("cyan")
+//                stroke = c("black")
+//                isSmooth = true
+//            }
+//            label(" Связь со ПР") {
+//                hboxConstraints {
+//                    hGrow = Priority.ALWAYS
+//                    marginBottom = 8.0
+//                }
+//            }
+//        }
     }.addClass(Styles.blueTheme, megaHard)
 
     @ExperimentalTime

@@ -44,27 +44,23 @@ interface IDeviceController {
 
     val pollingRegisters: MutableList<DeviceRegister>
     val writingRegisters: MutableList<Pair<DeviceRegister, Number>>
-    val pollingMutex: Any
-    val writingMutex: Any
 
     fun IDeviceController.transactionWithAttempts(block: () -> Unit) {
         var attempt = 0
-        val connection = protocolAdapter.connection
-
-        while (attempt++ < connection.attemptCount) {
+        while (true) {
             requestTotalCount++
 
             try {
                 block()
                 requestSuccessCount++
                 break
-            } catch (e: ru.avem.kserialpooler.communication.utils.TransportException) {
+            } catch (e: TransportException) {
                 val message =
-                    "repeat $attempt/${connection.attemptCount} attempts with common success rate = ${(requestSuccessCount) * 100 / requestTotalCount}%"
+                    "repeat $attempt/${protocolAdapter.connection.attemptCount} attempts with common success rate = ${(requestSuccessCount) * 100 / requestTotalCount}%"
                 KotlinLogging.logger(name).info(message)
 
-                if (attempt == connection.attemptCount) {
-                    throw ru.avem.kserialpooler.communication.utils.TransportException(message)
+                if (attempt++ >= protocolAdapter.connection.attemptCount) {
+                    throw e
                 }
             }
             sleep(10)
@@ -74,51 +70,63 @@ interface IDeviceController {
     fun getRegisterById(idRegister: String): DeviceRegister
 
     fun addPollingRegister(register: DeviceRegister) {
-        synchronized(pollingMutex) {
+        synchronized(protocolAdapter.connection) {
             pollingRegisters.add(register)
         }
     }
 
     fun addWritingRegister(writingPair: Pair<DeviceRegister, Number>) {
-        synchronized(writingMutex) {
+        synchronized(protocolAdapter.connection) {
             writingRegisters.add(writingPair)
         }
     }
 
     fun removePollingRegister(register: DeviceRegister) {
-        synchronized(pollingMutex) {
+        synchronized(protocolAdapter.connection) {
             pollingRegisters.remove(register)
         }
     }
 
     fun removeAllPollingRegisters() {
-        synchronized(pollingMutex) {
+        synchronized(protocolAdapter.connection) {
             pollingRegisters.forEach(DeviceRegister::deleteObservers)
             pollingRegisters.clear()
         }
     }
 
     fun removeAllWritingRegisters() {
-        synchronized(writingMutex) {
-            writingRegisters.forEach {
-                it.first.deleteObservers()
-            }
+        synchronized(protocolAdapter.connection) {
+            writingRegisters.map {
+                it.first
+            }.forEach(DeviceRegister::deleteObservers)
             writingRegisters.clear()
         }
     }
 
     fun readPollingRegisters() {
-        synchronized(pollingMutex) {
-            pollingRegisters.forEach {
-                readRegister(it)
+        synchronized(protocolAdapter.connection) {
+            for (register in pollingRegisters) {
+                isResponding = try {
+                    readRegister(register)
+                    true
+                } catch (e: TransportException) {
+                    false
+                }
+                if (!isResponding) break
             }
         }
     }
 
     fun writeWritingRegisters() {
-        synchronized(writingMutex) {
-            writingRegisters.forEach {
-                writeRegister(it.first, it.second)
+        synchronized(protocolAdapter.connection) {
+            for (pair in writingRegisters) {
+                isResponding = try {
+                    writeRegister(pair.first, pair.second)
+                    true
+                } catch (e: TransportException) {
+                    false
+                }
+                if (!isResponding) break
             }
         }
     }

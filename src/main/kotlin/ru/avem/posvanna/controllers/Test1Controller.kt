@@ -5,6 +5,7 @@ import javafx.scene.control.ButtonType
 import javafx.scene.text.Text
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.posvanna.communication.model.CommunicationModel
+import ru.avem.posvanna.communication.model.IDeviceController
 import ru.avem.posvanna.communication.model.devices.owen.pr.OwenPrModel
 import ru.avem.posvanna.communication.model.devices.owen.trm136.Trm136Model
 import ru.avem.posvanna.communication.model.devices.parma.ParmaModel
@@ -188,6 +189,8 @@ class Test1Controller : TestController() {
     private var cycles: Int = 0
 
     private var maxTemp: Double = 0.0
+    private var maxCurrent: Double = 0.0
+    private var isNotResponding: Int = 0
 
     //region листы для БД
     private var listOfValues11 = mutableListOf<String>()
@@ -237,26 +240,19 @@ class Test1Controller : TestController() {
         }
     }
 
-    fun isDevicesResponding(): Boolean {
-        return CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding
-    }
-
     private fun startPollDevices() {
         //region pr pool
-        CommunicationModel.startPoll(CommunicationModel.DeviceID.DD2, OwenPrModel.FIXED_STATES_REGISTER_1) { value ->
-            stopButton = value.toShort() and 32 > 0
-            startButton = value.toShort() and 64 > 0
-            if (doorZone1) {
-                controller.cause = "Открыта дверь зоны"
-            }
-            if (stopButton) {
-                controller.cause = "Нажата кнопка Стоп"
-            }
-        }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.DD2, OwenPrModel.INSTANT_STATES_REGISTER_1) { value ->
             doorZone1 = value.toShort() and 2 > 0
             if (doorZone1) {
                 controller.cause = "Открыта дверь зоны"
+            }
+
+            startButton = value.toShort() and 64 > 0
+
+            stopButton = value.toShort() and 32 > 0
+            if (stopButton) {
+                controller.cause = "Нажата кнопка Стоп"
             }
         }
         //endregion
@@ -270,10 +266,6 @@ class Test1Controller : TestController() {
         }
         CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.IC) { value ->
             measuringIC = value.toDouble() * 10
-        }
-
-        if (measuringIA > 29 || measuringIB > 29 || measuringIC > 29) {
-            controller.cause = "Ток превысил 29А"
         }
 
         CommunicationModel.startPoll(CommunicationModel.DeviceID.PARMA1, ParmaModel.U_AB) { value ->
@@ -357,6 +349,26 @@ class Test1Controller : TestController() {
                 mainView.buttonStop.isDisable = false
                 mainView.buttonStart.isDisable = true
             }
+            listOfValues11.clear()
+            listOfValues12.clear()
+            listOfValues13.clear()
+            listOfValues14.clear()
+            listOfValues15.clear()
+            listOfValues16.clear()
+            listOfValues17.clear()
+            listOfValues21.clear()
+            listOfValues22.clear()
+            listOfValues23.clear()
+            listOfValues24.clear()
+            listOfValues25.clear()
+            listOfValues26.clear()
+            listOfValues31.clear()
+            listOfValues32.clear()
+            listOfValues33.clear()
+            listOfValues34.clear()
+            listOfValues35.clear()
+            listOfValues36.clear()
+            isNotResponding = 0
             controller.cause = ""
             controller.isExperimentRunning = true
             isExperimentEnded = false
@@ -377,7 +389,9 @@ class Test1Controller : TestController() {
                 mainView.checkBoxTest2.isDisable = true
                 mainView.checkBoxTest3.isDisable = true
                 mainView.textFieldMaxTemp.isDisable = true
+                mainView.textFieldMaxCurrent.isDisable = true
             }
+            maxCurrent = mainView.textFieldMaxCurrent.text.replace(",", ".").toDouble()
             maxTemp = mainView.textFieldMaxTemp.text.replace(",", ".").toDouble()
 
             if (controller.isExperimentRunning) {
@@ -387,57 +401,57 @@ class Test1Controller : TestController() {
             }
 
             var timeToPrepare = 300
-            while (!controller.isDevicesResponding() && controller.isExperimentRunning && timeToPrepare-- > 0) {
+            while (!isDevicesResponding() && controller.isExperimentRunning && timeToPrepare-- > 0) {
                 sleep(100)
             }
 
-            if (!controller.isDevicesResponding()) {
+            if (!isDevicesResponding()) {
                 var cause = ""
                 cause += "Не отвечают приборы: "
-                if (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.DD2).isResponding) {
+                if (!CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.DD2).isResponding) {
                     cause += "ПР "
                 }
-                if (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM1).isResponding) {
+                if (!CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM1).isResponding) {
                     cause += "ТРМ1 "
                 }
-                if (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM2).isResponding) {
+                if (!CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM2).isResponding) {
                     cause += "ТРМ2 "
                 }
-                if (!CommunicationModel.getDeviceById(CommunicationModel.DeviceID.TRM3).isResponding) {
+                if (!CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM3).isResponding) {
                     cause += "ТРМ3 "
                 }
                 controller.cause = cause
             }
 
-            if (controller.isExperimentRunning && controller.isDevicesResponding()) {
+            if (controller.isExperimentRunning && isDevicesResponding()) {
                 CommunicationModel.addWritingRegister(
                     CommunicationModel.DeviceID.DD2,
                     OwenPrModel.RESET_DOG,
                     1.toShort()
                 )
                 owenPR.initOwenPR()
-                startPollDevices()
+                owenPR.offAllKMs()
                 sleep(1000)
             }
 
 
-            if (!startButton && controller.isExperimentRunning && controller.isDevicesResponding()) {
+            if (!startButton && controller.isExperimentRunning && isDevicesResponding()) {
                 runLater {
                     Toast.makeText("Нажмите кнопку ПУСК").show(Toast.ToastType.WARNING)
                 }
             }
 
             var timeToStart = 300
-            while (!startButton && controller.isExperimentRunning && controller.isDevicesResponding() && timeToStart-- > 0) {
+            while (!startButton && controller.isExperimentRunning && isDevicesResponding() && timeToStart-- > 0) {
                 appendOneMessageToLog(LogTag.DEBUG, "Нажмите кнопку ПУСК")
                 sleep(100)
             }
 
-            if (!startButton && controller.isExperimentRunning && controller.isDevicesResponding()) {
+            if (!startButton && controller.isExperimentRunning && isDevicesResponding()) {
                 controller.cause = "Не нажата кнопка ПУСК"
             }
 
-            if (controller.isExperimentRunning && controller.isDevicesResponding()) {
+            if (controller.isExperimentRunning && isDevicesResponding()) {
                 soundWarning(1, 1000)
                 appendMessageToLog(LogTag.DEBUG, "Подготовка стенда")
                 startValues()
@@ -460,6 +474,11 @@ class Test1Controller : TestController() {
                 tickPeriod = 1.seconds, tickTimes = allTime,
                 tickJob = {
                     if (!controller.isExperimentRunning) it.stop()
+
+                    if (measuringIA > maxCurrent || measuringIB > maxCurrent || measuringIC > maxCurrent) {
+                        controller.cause = "Ток превысил $maxCurrent А"
+                    }
+
                     runLater {
                         mainView.labelTimeRemaining.text =
                             "                   Осталось всего: " + toHHmmss((allTime - it.getCurrentTicks()) * 1000L)
@@ -469,6 +488,7 @@ class Test1Controller : TestController() {
                         controller.tableValuesTest22[0].ampere.value = formatRealNumber(measuringIB).toString()
                         controller.tableValuesTest23[0].voltage.value = formatRealNumber(measuringUC).toString()
                         controller.tableValuesTest23[0].ampere.value = formatRealNumber(measuringIC).toString()
+
                         if (measuringt11 < -50 || measuringt11 > 100 || !trmStatus11) {
                             controller.tableValuesTest1[0].section1t.value = "-.--"
                         } else {
@@ -727,7 +747,7 @@ class Test1Controller : TestController() {
                 })
 
             var currentCycle = 0
-            while (controller.isExperimentRunning && controller.isDevicesResponding() && cycles-- > 0) {
+            while (controller.isExperimentRunning && isDevicesResponding() && cycles-- > 0) {
                 appendOneMessageToLog(LogTag.MESSAGE, "Цикл ${++currentCycle}")
 
                 if (controller.tableValuesTestTime[0].start.value.replace(",", ".").toDouble() != 0.0) {
@@ -755,17 +775,17 @@ class Test1Controller : TestController() {
                         onFinishJob = {
                         })
 
-                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on11()
                     }
-                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on21()
                     }
-                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on31()
                     }
 
-                    while (controller.isExperimentRunning && callbackTimerStart1.isRunning && controller.isDevicesResponding()) {
+                    while (controller.isExperimentRunning && callbackTimerStart1.isRunning && isDevicesResponding()) {
                         sleep(100)
                     }
 
@@ -797,17 +817,17 @@ class Test1Controller : TestController() {
                         onFinishJob = {
                         })
 
-                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on12()
                     }
-                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on22()
                     }
-                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on32()
                     }
 
-                    while (controller.isExperimentRunning && callbackTimerStart2.isRunning && controller.isDevicesResponding()) {
+                    while (controller.isExperimentRunning && callbackTimerStart2.isRunning && isDevicesResponding()) {
                         sleep(100)
                     }
 
@@ -839,17 +859,17 @@ class Test1Controller : TestController() {
                         onFinishJob = {
                         })
 
-                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on13()
                     }
-                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on23()
                     }
-                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on33()
                     }
 
-                    while (controller.isExperimentRunning && callbackTimerStart3.isRunning && controller.isDevicesResponding()) {
+                    while (controller.isExperimentRunning && callbackTimerStart3.isRunning && isDevicesResponding()) {
                         sleep(100)
                     }
 
@@ -881,17 +901,17 @@ class Test1Controller : TestController() {
                         onFinishJob = {
                         })
 
-                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on14()
                     }
-                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on24()
                     }
-                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on34()
                     }
 
-                    while (controller.isExperimentRunning && callbackTimerStart4.isRunning && controller.isDevicesResponding()) {
+                    while (controller.isExperimentRunning && callbackTimerStart4.isRunning && isDevicesResponding()) {
                         sleep(100)
                     }
 
@@ -923,17 +943,17 @@ class Test1Controller : TestController() {
                         onFinishJob = {
                         })
 
-                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on15()
                     }
-                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on25()
                     }
-                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on35()
                     }
 
-                    while (controller.isExperimentRunning && callbackTimerStart5.isRunning && controller.isDevicesResponding()) {
+                    while (controller.isExperimentRunning && callbackTimerStart5.isRunning && isDevicesResponding()) {
                         sleep(100)
                     }
 
@@ -965,17 +985,17 @@ class Test1Controller : TestController() {
                         onFinishJob = {
                         })
 
-                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest1.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on16()
                     }
-                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest2.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on26()
                     }
-                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && controller.isDevicesResponding()) {
+                    if (mainView.checkBoxTest3.isSelected && controller.isExperimentRunning && isDevicesResponding()) {
                         owenPR.on36()
                     }
 
-                    while (controller.isExperimentRunning && callbackTimerStart6.isRunning && controller.isDevicesResponding()) {
+                    while (controller.isExperimentRunning && callbackTimerStart6.isRunning && isDevicesResponding()) {
                         sleep(100)
                     }
 
@@ -1008,7 +1028,7 @@ class Test1Controller : TestController() {
                         onFinishJob = {
                         })
 
-                    while (controller.isExperimentRunning && callbackTimerPause.isRunning) {
+                    while (controller.isExperimentRunning && callbackTimerPause.isRunning && isDevicesResponding()) {
                         sleep(100)
                     }
                     if (controller.isExperimentRunning) {
@@ -1172,8 +1192,8 @@ class Test1Controller : TestController() {
                 operator = controller.position1
                 cipher1 = mainView.tfCipher1.text.toString()
                 productName1 = mainView.tfProductNumber1.text.toString()
-                cipher2 = mainView.tfCipher3.text.toString()
-                productName2 = mainView.tfProductNumber3.text.toString()
+                cipher2 = mainView.tfCipher2.text.toString()
+                productName2 = mainView.tfProductNumber2.text.toString()
                 cipher3 = mainView.tfCipher3.text.toString()
                 productName3 = mainView.tfProductNumber3.text.toString()
                 temp11 = listOfValues11.toString()
@@ -1182,6 +1202,7 @@ class Test1Controller : TestController() {
                 temp14 = listOfValues14.toString()
                 temp15 = listOfValues15.toString()
                 temp16 = listOfValues16.toString()
+                temp17 = listOfValues17.toString()
                 temp21 = listOfValues21.toString()
                 temp22 = listOfValues22.toString()
                 temp23 = listOfValues23.toString()
@@ -1251,12 +1272,65 @@ class Test1Controller : TestController() {
         if (controller.cause.isNotEmpty()) {
             appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: ${controller.cause}")
             soundError()
-        } else if (!controller.isDevicesResponding()) {
+        } else if (!isDevicesResponding()) {
             appendMessageToLog(LogTag.ERROR, "Испытание прервано по причине: потеряна связь с устройствами")
             soundError()
         } else {
             appendMessageToLog(LogTag.MESSAGE, "Испытание завершено успешно")
         }
+    }
+
+    fun isDevicesResponding(): Boolean {
+        if (!CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.DD2).isResponding) {
+            appendOneMessageToLog(LogTag.ERROR, "Попытка восстановления связи с ПР")
+            owenPR.offAllKMs()
+            CommunicationModel.clearPollingRegisters()
+            sleep(100)
+            startPollDevices()
+            CommunicationModel.addWritingRegister(
+                CommunicationModel.DeviceID.DD2,
+                OwenPrModel.RESET_DOG,
+                1.toShort()
+            )
+            owenPR.initOwenPR()
+            isNotResponding += 1
+        }
+        if (!CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM1).isResponding) {
+            appendOneMessageToLog(LogTag.ERROR, "Попытка восстановления связи с ТРМ1")
+            CommunicationModel.clearPollingRegisters()
+            sleep(100)
+            startPollDevices()
+            isNotResponding += 1
+        }
+        if (!CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM2).isResponding) {
+            appendOneMessageToLog(LogTag.ERROR, "Попытка восстановления связи с ТРМ2")
+            CommunicationModel.clearPollingRegisters()
+            sleep(100)
+            startPollDevices()
+            isNotResponding += 1
+        }
+        if (!CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM3).isResponding) {
+            appendOneMessageToLog(LogTag.ERROR, "Попытка восстановления связи с ТРМ3")
+            CommunicationModel.clearPollingRegisters()
+            sleep(100)
+            startPollDevices()
+            isNotResponding += 1
+        }
+        if (CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.DD2).isResponding &&
+            CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM1).isResponding &&
+            CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM2).isResponding &&
+            CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM3).isResponding
+        ) {
+            isNotResponding = 0
+        }
+        if (isNotResponding > 10) {
+            return false
+        }
+
+        return true/*CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.DD2).isResponding &&
+                CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM1).isResponding &&
+                CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM2).isResponding &&
+                CommunicationModel.device<IDeviceController>(CommunicationModel.DeviceID.TRM3).isResponding*/
     }
 
     private fun finalizeExperiment() {
@@ -1275,6 +1349,7 @@ class Test1Controller : TestController() {
             mainView.checkBoxTest2.isDisable = false
             mainView.checkBoxTest3.isDisable = false
             mainView.textFieldMaxTemp.isDisable = false
+            mainView.textFieldMaxCurrent.isDisable = false
         }
     }
 }

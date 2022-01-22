@@ -20,10 +20,8 @@ class Trm136Controller(
     override var requestTotalCount = 0
     override var requestSuccessCount = 0
     override val pollingRegisters = mutableListOf<DeviceRegister>()
-    override val writingMutex = Any()
 
     override val writingRegisters = mutableListOf<Pair<DeviceRegister, Number>>()
-    override val pollingMutex = Any()
 
     override fun readRegister(register: DeviceRegister) {
         isResponding = try {

@@ -34,7 +34,7 @@ object CommunicationModel {
 
     private val modbusAdapter = ModbusRTUAdapter(connection)
 
-    private val deviceControllers: Map<DeviceID, IDeviceController> = mapOf(
+    private val devices: Map<DeviceID, IDeviceController> = mapOf(
             DeviceID.PARMA1 to ParmaController(DeviceID.PARMA1.toString(), modbusAdapter, 1),
             DeviceID.DD2 to OwenPrController(DeviceID.DD2.toString(), modbusAdapter, 2),
             DeviceID.TRM1 to Trm136Controller(DeviceID.TRM1.toString(), modbusAdapter, 8),
@@ -43,32 +43,40 @@ object CommunicationModel {
     )
 
     init {
-        thread(isDaemon = true) {
-            while (isAppRunning) {
-                if (isConnected) {
-                    deviceControllers.values.forEach {
-                        it.readPollingRegisters()
+        with(devices.values.groupBy { it.protocolAdapter.connection }) {
+            keys.forEach { connection ->
+                thread(isDaemon = true) {
+                    while (true) {
+                        if (isConnected) {
+                            this[connection]!!.forEach {
+                                it.readPollingRegisters()
+                                sleep(1)
+                            }
+                        }
+                        sleep(1)
                     }
                 }
-                sleep(100)
             }
         }
         thread(isDaemon = true) {
-            while (isAppRunning) {
+            while (true) {
                 if (isConnected) {
-                    deviceControllers.values.forEach {
+                    devices.values.forEach {
                         it.writeWritingRegisters()
+                        sleep(1)
                     }
                 }
-                sleep(100)
+                sleep(1)
             }
         }
     }
 
-    fun getDeviceById(deviceID: DeviceID) = deviceControllers[deviceID] ?: error("Не определено $deviceID")
+    fun <T : IDeviceController> device(deviceID: DeviceID): T {
+        return devices[deviceID] as T
+    }
 
     fun startPoll(deviceID: DeviceID, registerID: String, block: (Number) -> Unit) {
-        val device = getDeviceById(deviceID)
+        val device = device<IDeviceController>(deviceID)
         val register = device.getRegisterById(registerID)
         register.addObserver { _, arg ->
             block(arg as Number)
@@ -77,23 +85,27 @@ object CommunicationModel {
     }
 
     fun clearPollingRegisters() {
-        deviceControllers.values.forEach(IDeviceController::removeAllPollingRegisters)
+        devices.values.forEach(IDeviceController::removeAllPollingRegisters)
+        devices.values.forEach(IDeviceController::removeAllWritingRegisters)
     }
 
     fun removePollingRegister(deviceID: DeviceID, registerID: String) {
-        val device = getDeviceById(deviceID)
+        val device = device<IDeviceController>(deviceID)
         val register = device.getRegisterById(registerID)
         register.deleteObservers()
         device.removePollingRegister(register)
     }
 
-    fun checkDevices(): List<DeviceID> {
-        deviceControllers.values.forEach(IDeviceController::checkResponsibility)
-        return deviceControllers.filter { !it.value.isResponding }.keys.toList()
+    fun checkDevices(checkedDevices: List<IDeviceController>): List<DeviceID> {
+        checkedDevices.forEach(IDeviceController::checkResponsibility)
+        return listOfUnresponsiveDevices(checkedDevices)
     }
 
+    fun listOfUnresponsiveDevices(checkedDevices: List<IDeviceController>) =
+        devices.filter { checkedDevices.toList().contains(it.value) && !it.value.isResponding }.keys.toList()
+
     fun addWritingRegister(deviceID: DeviceID, registerID: String, value: Number) {
-        val device = getDeviceById(deviceID)
+        val device = device<IDeviceController>(deviceID)
         val register = device.getRegisterById(registerID)
         device.addWritingRegister(register to value)
     }
