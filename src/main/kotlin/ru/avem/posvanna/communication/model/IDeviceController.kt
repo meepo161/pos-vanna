@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import ru.avem.kserialpooler.communication.adapters.modbusrtu.ModbusRTUAdapter
 import ru.avem.posvanna.communication.utils.TransportException
 import ru.avem.posvanna.utils.sleep
-import java.lang.Exception
 
 interface IDeviceController {
     val name: String
@@ -106,12 +105,7 @@ interface IDeviceController {
     fun readPollingRegisters() {
         synchronized(protocolAdapter.connection) {
             for (register in pollingRegisters) {
-                isResponding = try {
-                    readRegister(register)
-                    true
-                } catch (e: TransportException) {
-                    false
-                }
+                readRegister(register)
                 if (!isResponding) break
             }
         }
@@ -120,12 +114,7 @@ interface IDeviceController {
     fun writeWritingRegisters() {
         synchronized(protocolAdapter.connection) {
             for (pair in writingRegisters) {
-                isResponding = try {
-                    writeRegister(pair.first, pair.second)
-                    true
-                } catch (e: TransportException) {
-                    false
-                }
+                writeRegister(pair.first, pair.second)
                 if (!isResponding) break
             }
         }
