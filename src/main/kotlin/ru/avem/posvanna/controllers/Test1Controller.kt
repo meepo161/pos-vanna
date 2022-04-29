@@ -1080,6 +1080,7 @@ class Test1Controller : TestController() {
                                         temp4 = protocol.temp14
                                         temp5 = protocol.temp15
                                         temp6 = protocol.temp16
+                                        temp7 = protocol.temp17
                                         NUMBER_DATE_ATTESTATION = protocol.NUMBER_DATE_ATTESTATION
                                         NAME_OF_OPERATION = protocol.NAME_OF_OPERATION
                                         NUMBER_CONTROLLER = protocol.NUMBER_CONTROLLER
@@ -1111,6 +1112,7 @@ class Test1Controller : TestController() {
                                         temp4 = protocol.temp24
                                         temp5 = protocol.temp25
                                         temp6 = protocol.temp26
+                                        temp7 = protocol.temp17
                                         NUMBER_DATE_ATTESTATION = protocol.NUMBER_DATE_ATTESTATION
                                         NAME_OF_OPERATION = protocol.NAME_OF_OPERATION
                                         NUMBER_CONTROLLER = protocol.NUMBER_CONTROLLER
@@ -1142,6 +1144,7 @@ class Test1Controller : TestController() {
                                         temp4 = protocol.temp34
                                         temp5 = protocol.temp35
                                         temp6 = protocol.temp36
+                                        temp7 = protocol.temp17
                                         NUMBER_DATE_ATTESTATION = protocol.NUMBER_DATE_ATTESTATION
                                         NAME_OF_OPERATION = protocol.NAME_OF_OPERATION
                                         NUMBER_CONTROLLER = protocol.NUMBER_CONTROLLER

@@ -157,7 +157,7 @@ fun saveProtocolAsWorkbook(protocol: Protocol, path: String = "protocol.xlsx") {
                 protocol.temp36,
                 0, 15
             )
-            drawLineChart18(wb)
+            drawLineChart18(wb, protocol)
             sheet.protectSheet("avem")
             val outStream = ByteArrayOutputStream()
             wb.write(outStream)
@@ -254,6 +254,7 @@ fun saveProtocolAsWorkbook(
                 protocolRotorBlade.temp4,
                 protocolRotorBlade.temp5,
                 protocolRotorBlade.temp6,
+                protocolRotorBlade.temp7,
                 0, 15
             ) //TODO
             drawLineChart6(wb)
@@ -519,6 +520,7 @@ fun fillParameters6(
     dots14: String,
     dots15: String,
     dots16: String,
+    dots17: String,
     columnNumber: Int, rawNumber: Int
 ) {
     val values11 = dots11.removePrefix("[").removePrefix("'").removeSuffix("]")
@@ -533,6 +535,8 @@ fun fillParameters6(
         .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
     val values16 = dots16.removePrefix("[").removePrefix("'").removeSuffix("]")
         .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+    val values17 = dots17.removePrefix("[").removePrefix("'").removeSuffix("]")
+        .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
 
     val valuesForExcel11 = arrayListOf<Double>()
     val valuesForExcel12 = arrayListOf<Double>()
@@ -540,6 +544,7 @@ fun fillParameters6(
     val valuesForExcel14 = arrayListOf<Double>()
     val valuesForExcel15 = arrayListOf<Double>()
     val valuesForExcel16 = arrayListOf<Double>()
+    val valuesForExcel17 = arrayListOf<Double>()
 
     var step = 1
     if (values11.size > 200) {
@@ -553,6 +558,7 @@ fun fillParameters6(
         valuesForExcel14.add(values14[i])
         valuesForExcel15.add(values15[i])
         valuesForExcel16.add(values16[i])
+        valuesForExcel17.add(values17[i])
     }
     val sheet = wb.getSheetAt(0)
     var row: Row
@@ -568,13 +574,14 @@ fun fillParameters6(
         fillOneCell(row, columnNumber + 4, cellStyle, valuesForExcel14[i])
         fillOneCell(row, columnNumber + 5, cellStyle, valuesForExcel15[i])
         fillOneCell(row, columnNumber + 6, cellStyle, valuesForExcel16[i])
+        fillOneCell(row, columnNumber + 7, cellStyle, valuesForExcel17[i])
         row = sheet.createRow(++rowNum)
         dot += step
     }
 
 }
 
-private fun drawLineChart18(workbook: XSSFWorkbook) {
+private fun drawLineChart18(workbook: XSSFWorkbook, protocol: Protocol) {
     val sheet = workbook.getSheet("Sheet1")
     val sheet2 = workbook.getSheet("Sheet2")
     val lastRowIndex = sheet.lastRowNum - 4
@@ -676,6 +683,7 @@ private fun drawLineChart6(workbook: XSSFWorkbook) {
     val valueData14 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
     val valueData15 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
     val valueData16 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
+    val valueData17 = DataSources.fromNumericCellRange(sheet, CellRangeAddress(15, lastRowIndex, ++i, i))
 
     var lastRowForGraph = 1
     val graphHeight = 41
@@ -697,6 +705,9 @@ private fun drawLineChart6(workbook: XSSFWorkbook) {
     lastRowForGraph += graphSpace
     val lineChart16 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
     drawLineChart18(lineChart16, timeData11, valueData16, "6 секция, мин")
+    lastRowForGraph += graphSpace
+    val lineChart17 = createLineChart(sheet2, lastRowForGraph, lastRowForGraph + graphHeight)
+    drawLineChart18(lineChart17, timeData11, valueData17, "Вода, мин")
 }
 
 private fun drawLineChart18(

@@ -19,6 +19,7 @@ object ProtocolsRotorBladeTable : IntIdTable() {
     val temp4 =  varchar("temp4", 99999999)
     val temp5 =  varchar("temp5", 99999999)
     val temp6 =  varchar("temp6", 99999999)
+    val temp7 =  varchar("temp7", 99999999)
     var NUMBER_DATE_ATTESTATION = varchar("NUMBER_DATE_ATTESTATION", 512)
     var NAME_OF_OPERATION = varchar("NAME_OF_OPERATION", 512)
     var NUMBER_CONTROLLER = varchar("NUMBER_CONTROLLER", 512)
@@ -45,6 +46,7 @@ class ProtocolRotorBlade(id: EntityID<Int>) : IntEntity(id) {
     var temp4 by ProtocolsRotorBladeTable.temp4
     var temp5 by ProtocolsRotorBladeTable.temp5
     var temp6 by ProtocolsRotorBladeTable.temp6
+    var temp7 by ProtocolsRotorBladeTable.temp7
     var NUMBER_DATE_ATTESTATION by ProtocolsRotorBladeTable.NUMBER_DATE_ATTESTATION
     var NAME_OF_OPERATION by ProtocolsRotorBladeTable.NAME_OF_OPERATION
     var NUMBER_CONTROLLER by ProtocolsRotorBladeTable.NUMBER_CONTROLLER
